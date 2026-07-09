@@ -1,68 +1,68 @@
-import warnings
-warnings.simplefilter('ignore')
-import uuid
-import shutil
-import os
-import cv2
-import sys
-import pickle
-import subprocess
-import numpy as np
-from PIL import Image
-from tensorflow.keras.models import load_model
+# import warnings
+# warnings.simplefilter('ignore')
+# import uuid
+# import shutil
+# import os
+# import cv2
+# import sys
+# import pickle
+# import subprocess
+# import numpy as np
+# from PIL import Image
+# from tensorflow.keras.models import load_model
 
 
 
-from werkzeug.utils import secure_filename
+# from werkzeug.utils import secure_filename
 
-from flask import Flask, render_template, request, redirect, url_for
+# from flask import Flask, render_template, request, redirect, url_for
 
-from flask import Flask, render_template, request
-from OpenHealth.DiseaseDetection.Malaria_Prediction.pipelines.Prediction_pipeline import PredictionPipeline as MalariaPredictionPipeline
-from OpenHealth.DiseaseDetection.Diabetes_Disease_Prediction.pipelines.Prediction_pipeline import Diabetes_Data, PredictDiabetes
-from OpenHealth.DiseaseDetection.Heart_Disease_Prediction.pipelines.Prediction_pipeline import CustomData, PredictPipeline
-from OpenHealth.DiseaseDetection.Breast_Cancer_Prediction.pipelines.Prediction_pipeline import PredictBCancer, BCancer_Data
-from OpenHealth.DiseaseDetection.Parkinsons_Disease_Prediction.pipelines.Prediction_pipeline import PredictParkinsons, Parkinsons_Data
-from OpenHealth.DiseaseDetection.Liver_Disease_Prediction.pipelines.Prediction_pipeline import LiverData, PredictLiver
+# from flask import Flask, render_template, request
+# from OpenHealth.DiseaseDetection.Malaria_Prediction.pipelines.Prediction_pipeline import PredictionPipeline as MalariaPredictionPipeline
+# from OpenHealth.DiseaseDetection.Diabetes_Disease_Prediction.pipelines.Prediction_pipeline import Diabetes_Data, PredictDiabetes
+# from OpenHealth.DiseaseDetection.Heart_Disease_Prediction.pipelines.Prediction_pipeline import CustomData, PredictPipeline
+# from OpenHealth.DiseaseDetection.Breast_Cancer_Prediction.pipelines.Prediction_pipeline import PredictBCancer, BCancer_Data
+# from OpenHealth.DiseaseDetection.Parkinsons_Disease_Prediction.pipelines.Prediction_pipeline import PredictParkinsons, Parkinsons_Data
+# from OpenHealth.DiseaseDetection.Liver_Disease_Prediction.pipelines.Prediction_pipeline import LiverData, PredictLiver
 
-# from OpenHealth.DiseaseDetection.Brain_Tumor_Detection.pipelines.Prediction_pipeline import PredictBrainTumour
-# kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
-# kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
+# # from OpenHealth.DiseaseDetection.Brain_Tumor_Detection.pipelines.Prediction_pipeline import PredictBrainTumour
+# # kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
+# # kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
 
-kidney_model = None
-kidney_model_path = os.path.join("Artifacts", "Kidney_Disease", "Kidney_Model.h5")
-if os.path.exists(kidney_model_path):
-    kidney_model = load_model(kidney_model_path)
+# kidney_model = None
+# kidney_model_path = os.path.join("Artifacts", "Kidney_Disease", "Kidney_Model.h5")
+# if os.path.exists(kidney_model_path):
+#     kidney_model = load_model(kidney_model_path)
 
-# ---------------------------------------------------
-# LUNG MODEL
-# ---------------------------------------------------
-# lung_model = None
-# lung_model_path = os.path.join("Artifacts", "Lung_Disease", "Lung_Model.h5")
-# if os.path.exists(lung_model_path):
-#     lung_model = load_model(lung_model_path)
-#     print(f"[INFO] Lung model loaded from: {lung_model_path}")
-# else:
-#     print(f"[WARNING] Lung model not found at: {lung_model_path}")
+# # ---------------------------------------------------
+# # LUNG MODEL
+# # ---------------------------------------------------
+# # lung_model = None
+# # lung_model_path = os.path.join("Artifacts", "Lung_Disease", "Lung_Model.h5")
+# # if os.path.exists(lung_model_path):
+# #     lung_model = load_model(lung_model_path)
+# #     print(f"[INFO] Lung model loaded from: {lung_model_path}")
+# # else:
+# #     print(f"[WARNING] Lung model not found at: {lung_model_path}")
 
-lung_model = load_model(r'Artifacts\Lung_Disease\Lung_Model.h5')
+# lung_model = load_model(r'Artifacts\Lung_Disease\Lung_Model.h5')
 
 
-# =========================
-# Brain Tumour model loader
-# =========================
-brain_model = None
+# # =========================
+# # Brain Tumour model loader
+# # =========================
+# brain_model = None
 
-try:
-    brain_model_path = os.path.join("Artifacts", "Brain_Tumour", "BrainModel.h5")
-    if os.path.exists(brain_model_path):
-        brain_model = load_model(brain_model_path)
-        print("Brain Tumour model loaded successfully.")
-    else:
-        print(f"Brain Tumour model not found at: {brain_model_path}")
-except Exception as e:
-    brain_model = None
-    print(f"Brain Tumour model loading failed: {e}")
+# try:
+#     brain_model_path = os.path.join("Artifacts", "Brain_Tumour", "BrainModel.h5")
+#     if os.path.exists(brain_model_path):
+#         brain_model = load_model(brain_model_path)
+#         print("Brain Tumour model loaded successfully.")
+#     else:
+#         print(f"Brain Tumour model not found at: {brain_model_path}")
+# except Exception as e:
+#     brain_model = None
+#     print(f"Brain Tumour model loading failed: {e}")
 
 
 # Missing model artifacts -> disable for now
@@ -81,7 +81,57 @@ except Exception as e:
 # livermodel = pickle.load(open('Artifacts\Liver_Disease\Liver_Model.pkl', 'rb'))
 # #liverpreprocessor = pickle.load(open('Artifacts\Liver_Disease\Liver_Preprocessor.pkl', 'rb'))
 
+import warnings
+warnings.simplefilter('ignore')
+import uuid
+import shutil
+import os
+import cv2
+import sys
+import pickle
+import subprocess
+import numpy as np
+from PIL import Image
+from tensorflow.keras.models import load_model
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, url_for
 
+from OpenHealth.DiseaseDetection.Malaria_Prediction.pipelines.Prediction_pipeline import PredictionPipeline as MalariaPredictionPipeline
+from OpenHealth.DiseaseDetection.Diabetes_Disease_Prediction.pipelines.Prediction_pipeline import Diabetes_Data, PredictDiabetes
+from OpenHealth.DiseaseDetection.Heart_Disease_Prediction.pipelines.Prediction_pipeline import CustomData, PredictPipeline
+from OpenHealth.DiseaseDetection.Breast_Cancer_Prediction.pipelines.Prediction_pipeline import PredictBCancer, BCancer_Data
+from OpenHealth.DiseaseDetection.Parkinsons_Disease_Prediction.pipelines.Prediction_pipeline import PredictParkinsons, Parkinsons_Data
+from OpenHealth.DiseaseDetection.Liver_Disease_Prediction.pipelines.Prediction_pipeline import LiverData, PredictLiver
+
+app = Flask(__name__)
+
+# =========================================================
+# SAFE MODEL LOADER
+# =========================================================
+def safe_load_keras_model(model_path, model_name):
+    try:
+        if os.path.exists(model_path):
+            model = load_model(model_path, compile=False)
+            print(f"[INFO] {model_name} model loaded from: {model_path}")
+            return model
+        else:
+            print(f"[WARNING] {model_name} model not found at: {model_path}")
+            return None
+    except Exception as e:
+        print(f"[ERROR] Failed to load {model_name} model: {e}")
+        return None
+
+
+# =========================================================
+# LOAD IMAGE MODELS
+# =========================================================
+kidney_model_path = os.path.join("Artifacts", "Kidney_Disease", "Kidney_Model.h5")
+lung_model_path   = os.path.join("Artifacts", "Lung_Disease", "Lung_Model.h5")
+brain_model_path  = os.path.join("Artifacts", "Brain_Tumour", "BrainModel.h5")
+
+kidney_model = safe_load_keras_model(kidney_model_path, "Kidney")
+lung_model   = safe_load_keras_model(lung_model_path, "Lung")
+brain_model  = safe_load_keras_model(brain_model_path, "Brain Tumour")
 
 app = Flask(__name__)
 
@@ -903,8 +953,12 @@ Disease Food to Avoid:"""
 
 # if __name__ == '__main__':
 #     app.run(debug=True, host='0.0.0.0', port=5000)
+# if __name__ == '__main__':
+
+#     print(app.url_map)
+
+#     app.run(debug=True, host='0.0.0.0', port=5000)
+
 if __name__ == '__main__':
-
-    print(app.url_map)
-
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
