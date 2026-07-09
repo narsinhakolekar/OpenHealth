@@ -9,31 +9,34 @@ class PredictDiabetes:
     def __init__(self):
         pass
     
-    def predict(self,features):
-        try:            
-            preprocessor_path=os.path.join("Artifacts","Diabetes_Disease","Diabetes_Preprocessor.pkl")
-            model_path=os.path.join("Artifacts","Diabetes_Disease","Diabetes_Model.pkl")
-            preprocessor=load_object(preprocessor_path)
-            model=load_object(model_path)
-            scaled_data=preprocessor.transform(features)
-            pred=model.predict(scaled_data)
+    def predict(self, features):
+        try:
+            preprocessor_path = os.path.join("Artifacts", "Diabetes_Disease", "Diabetes_Preprocessor.pkl")
+            model_path = os.path.join("Artifacts", "Diabetes_Disease", "Diabetes_Model.pkl")
+
+            preprocessor = load_object(preprocessor_path)
+            model = load_object(model_path)
+
+            scaled_data = preprocessor.transform(features)
+            pred = model.predict(scaled_data)
             return pred
 
         except Exception as e:
-            raise customexception(e,sys)
+            raise customexception(e, sys)
         
+
 class Diabetes_Data:
-    
-    def __init__(self,
-                 pregnancies: int,
-                 Glucose: int,
-                 BloodPressure: int,
-                 skin_thickness: int,
-                 insulin: int,
-                 BMI: float,
-                 DiabetesPedigreeFunction: float,
-                 Age: int):
-        
+    def __init__(
+        self,
+        pregnancies: int,
+        Glucose: int,
+        BloodPressure: int,
+        skin_thickness: int,
+        insulin: int,
+        BMI: float,
+        DiabetesPedigreeFunction: float,
+        Age: int
+    ):
         self.pregnancies = pregnancies
         self.Glucose = Glucose
         self.BloodPressure = BloodPressure
@@ -43,16 +46,14 @@ class Diabetes_Data:
         self.DiabetesPedigreeFunction = DiabetesPedigreeFunction
         self.Age = Age
 
-            
-                
     def get_data_as_dataframe(self):
         try:
             custom_data_input_dict = {
-                'pregnancies': [self.pregnancies],
+                'Pregnancies': [self.pregnancies],
                 'Glucose': [self.Glucose],
                 'BloodPressure': [self.BloodPressure],
-                'skin_thickness': [self.skin_thickness],
-                'insulin': [self.insulin],
+                'SkinThickness': [self.skin_thickness],
+                'Insulin': [self.insulin],
                 'BMI': [self.BMI],
                 'DiabetesPedigreeFunction': [self.DiabetesPedigreeFunction],
                 'Age': [self.Age]
@@ -62,6 +63,7 @@ class Diabetes_Data:
             print(df)
             logging.info('Dataframe Gathered')
             return df
+
         except Exception as e:
             logging.info('Exception Occurred in prediction pipeline')
-            raise customexception(e,sys)
+            raise customexception(e, sys)

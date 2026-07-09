@@ -36,7 +36,8 @@ class DataIngestion:
             logging.info("Diabetes Disease Prediction: Created the train and test data files")
             logging.info("Diabetes Disease Prediction: Data ingestion completed")
 
-            return (self.ingestion_config.test_data_path,self.ingestion_config.train_data_path)
+            # return (self.ingestion_config.test_data_path,self.ingestion_config.train_data_path)
+            return (self.ingestion_config.train_data_path, self.ingestion_config.test_data_path)
         
         except Exception as e:
             logging.info("Excpetion occured while ingesting the data")

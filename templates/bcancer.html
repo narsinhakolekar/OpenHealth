@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 20px;
+        }
+        .field label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .field input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            margin-top: 24px;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 12px;
+            text-align: center;
+            background: #eef6ff;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Breast Cancer Prediction</h1>
+
+        <form method="POST" action="/breastcancer">
+            <div class="grid">
+                <div class="field"><label>Texture Mean</label><input type="number" step="any" name="texture_mean" required></div>
+                <div class="field"><label>Smoothness Mean</label><input type="number" step="any" name="smoothness_mean" required></div>
+                <div class="field"><label>Compactness Mean</label><input type="number" step="any" name="compactness_mean" required></div>
+                <div class="field"><label>Concave Points Mean</label><input type="number" step="any" name="concave_points_mean" required></div>
+                <div class="field"><label>Symmetry Mean</label><input type="number" step="any" name="symmetry_mean" required></div>
+                <div class="field"><label>Fractal Dimension Mean</label><input type="number" step="any" name="fractal_dimension_mean" required></div>
+                <div class="field"><label>Texture SE</label><input type="number" step="any" name="texture_se" required></div>
+                <div class="field"><label>Area SE</label><input type="number" step="any" name="area_se" required></div>
+                <div class="field"><label>Smoothness SE</label><input type="number" step="any" name="smoothness_se" required></div>
+                <div class="field"><label>Compactness SE</label><input type="number" step="any" name="compactness_se" required></div>
+                <div class="field"><label>Concavity SE</label><input type="number" step="any" name="concavity_se" required></div>
+                <div class="field"><label>Concave Points SE</label><input type="number" step="any" name="concave_points_se" required></div>
+                <div class="field"><label>Symmetry SE</label><input type="number" step="any" name="symmetry_se" required></div>
+                <div class="field"><label>Fractal Dimension SE</label><input type="number" step="any" name="fractal_dimension_se" required></div>
+                <div class="field"><label>Texture Worst</label><input type="number" step="any" name="texture_worst" required></div>
+                <div class="field"><label>Area Worst</label><input type="number" step="any" name="area_worst" required></div>
+                <div class="field"><label>Smoothness Worst</label><input type="number" step="any" name="smoothness_worst" required></div>
+                <div class="field"><label>Compactness Worst</label><input type="number" step="any" name="compactness_worst" required></div>
+                <div class="field"><label>Concavity Worst</label><input type="number" step="any" name="concavity_worst" required></div>
+                <div class="field"><label>Concave Points Worst</label><input type="number" step="any" name="concave_points_worst" required></div>
+                <div class="field"><label>Symmetry Worst</label><input type="number" step="any" name="symmetry_worst" required></div>
+                <div class="field"><label>Fractal Dimension Worst</label><input type="number" step="any" name="fractal_dimension_worst" required></div>
+            </div>
+
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if final_result %}
+            <div class="result">
+                Prediction Result: {{ final_result }}
+            </div>
+        {% endif %}
+
+        <a class="back" href="/">Back to Home</a>
+    </div>
+</body>
+</html>

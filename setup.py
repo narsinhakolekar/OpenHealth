@@ -13,10 +13,10 @@ def get_requirements(file_path:str)->List[str]:
     return requirements
 
 setup(
-    name="OpenHealth",
+    name="openhealth_ml_project",
     version="0.0.1",
-    author="Hema_Kalyan",
-    author_email="kalyanmurapaka274@gmail.com",
+    author="Narsinha_kolekar",
+    author_email="narisnhakolekar222@gmail.com",
     install_requires=get_requirements("requirements.txt"),
     packages=find_packages()
 )

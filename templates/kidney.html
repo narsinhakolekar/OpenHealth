@@ -1,0 +1,620 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney CT Image Classification</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background: linear-gradient(135deg, #eaf4ff, #f8fbff);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:30px;
+        }
+
+        .container{
+            width:100%;
+            max-width:700px;
+            background:#fff;
+            border-radius:18px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            padding:35px;
+        }
+
+        .title{
+            text-align:center;
+            color:#0b4f8a;
+            margin-bottom:10px;
+            font-size:32px;
+            font-weight:700;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#555;
+            margin-bottom:25px;
+            font-size:15px;
+            line-height:1.6;
+        }
+
+        .upload-box{
+            border:2px dashed #b7d3f2;
+            background:#f7fbff;
+            border-radius:14px;
+            padding:25px;
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        .upload-box label{
+            display:block;
+            font-size:17px;
+            font-weight:600;
+            color:#184f86;
+            margin-bottom:15px;
+        }
+
+        input[type="file"]{
+            padding:10px;
+            background:#fff;
+            border:1px solid #d9e7f5;
+            border-radius:10px;
+            width:100%;
+            max-width:380px;
+        }
+
+        .btn-row{
+            display:flex;
+            justify-content:center;
+            gap:15px;
+            margin-top:20px;
+            flex-wrap:wrap;
+        }
+
+        .btn{
+            border:none;
+            outline:none;
+            padding:12px 26px;
+            border-radius:10px;
+            cursor:pointer;
+            font-size:16px;
+            font-weight:600;
+            transition:0.3s ease;
+            text-decoration:none;
+            display:inline-block;
+        }
+
+        .predict-btn{
+            background:#0b74de;
+            color:white;
+        }
+
+        .predict-btn:hover{
+            background:#095eb2;
+        }
+
+        .home-btn{
+            background:#edf4fb;
+            color:#0b4f8a;
+            border:1px solid #cfe0f1;
+        }
+
+        .home-btn:hover{
+            background:#dfeefa;
+        }
+
+        .result-box{
+            margin-top:28px;
+            padding:22px;
+            border-radius:14px;
+            background:#f9fcff;
+            border:1px solid #d9ebfb;
+        }
+
+        .result-title{
+            font-size:22px;
+            font-weight:700;
+            color:#163f68;
+            margin-bottom:12px;
+            text-align:center;
+        }
+
+        .prediction{
+            text-align:center;
+            font-size:28px;
+            font-weight:700;
+            color:#0b8a43;
+            margin-bottom:8px;
+        }
+
+        .confidence{
+            text-align:center;
+            font-size:18px;
+            color:#333;
+            margin-bottom:18px;
+            font-weight:600;
+        }
+
+        .table-title{
+            text-align:center;
+            font-size:18px;
+            color:#184f86;
+            margin-bottom:12px;
+            font-weight:700;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:10px;
+            overflow:hidden;
+            border-radius:12px;
+        }
+
+        thead{
+            background:#0b74de;
+            color:#fff;
+        }
+
+        th, td{
+            padding:14px 12px;
+            text-align:center;
+            border-bottom:1px solid #e5eef7;
+        }
+
+        tbody tr:nth-child(even){
+            background:#f5faff;
+        }
+
+        .disclaimer{
+            margin-top:18px;
+            padding:14px;
+            border-left:5px solid #f0ad4e;
+            background:#fff9f0;
+            color:#7a5a1d;
+            font-size:14px;
+            line-height:1.6;
+            border-radius:10px;
+        }
+
+        .error-box{
+            margin-top:20px;
+            padding:14px;
+            border-radius:10px;
+            background:#fff1f1;
+            color:#b42318;
+            border:1px solid #f5c2c7;
+            text-align:center;
+            font-weight:600;
+        }
+
+        @media(max-width:768px){
+            .container{
+                padding:20px;
+            }
+
+            .title{
+                font-size:26px;
+            }
+
+            .prediction{
+                font-size:24px;
+            }
+
+            th, td{
+                font-size:14px;
+                padding:10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="title">Kidney CT Image Classification</div>
+        <div class="subtitle">
+            Upload a kidney CT image to classify it into one of the following categories:
+            <b>Normal</b>, <b>Cyst</b>, <b>Stone</b>, or <b>Tumor</b>.
+        </div>
+
+        <form action="/kidney" method="POST" enctype="multipart/form-data">
+            <div class="upload-box">
+                <label for="file">Select Kidney CT Image</label>
+                <input type="file" name="file" id="file" accept="image/*" required>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn predict-btn">Predict</button>
+                <a href="/" class="btn home-btn">Back to Home</a>
+            </div>
+        </form>
+
+        {% if prediction %}
+        <div class="result-box">
+            <div class="result-title">Prediction Result</div>
+            <div class="prediction">{{ prediction }}</div>
+
+            {% if confidence is defined %}
+            <div class="confidence">Model Confidence: {{ confidence }}%</div>
+
+            <div class="table-title">Class Probabilities</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Probability</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Normal</td>
+                        <td>{{ normal }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Cyst</td>
+                        <td>{{ cyst }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Stone</td>
+                        <td>{{ stone }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Tumor</td>
+                        <td>{{ tumor }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="disclaimer">
+                <b>Disclaimer:</b> This result is generated by an AI model for educational / screening purposes only.
+                It should <b>not</b> be considered a final medical diagnosis. Please consult a qualified medical professional
+                for proper clinical evaluation.
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney CT Image Classification</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa, #dbeafe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            padding: 35px 30px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #475569;
+            font-size: 0.98rem;
+            margin-bottom: 28px;
+        }
+
+        .upload-box {
+            border: 2px dashed #93c5fd;
+            background: #f8fbff;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: #2563eb;
+            background: #f0f7ff;
+        }
+
+        .upload-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 12px;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            width: 100%;
+            max-width: 380px;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+        }
+
+        .result-box {
+            margin-top: 28px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .result-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .prediction-pill {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 8px auto 12px;
+            text-align: center;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .pred-normal {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .pred-cyst {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .pred-stone {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .pred-tumor {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        .pred-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .confidence {
+            font-size: 1rem;
+            color: #0f172a;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .confidence span {
+            color: #2563eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #eef6ff;
+        }
+
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            margin-top: 22px;
+            width: 100%;
+            text-align: center;
+            padding: 13px;
+            border-radius: 12px;
+            background: #0f172a;
+            color: white;
+            font-weight: 700;
+            transition: 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #1e293b;
+        }
+
+        .note {
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 18px;
+            }
+
+            .title {
+                font-size: 1.6rem;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+
+            .prediction-pill {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="title">Kidney CT Image Classification</h1>
+        <p class="subtitle">
+            Upload a kidney CT scan image to classify it as <b>Normal</b>, <b>Cyst</b>, <b>Stone</b>, or <b>Tumor</b>.
+        </p>
+
+        <form action="/kidney" method="POST" enctype="multipart/form-data">
+            <div class="upload-box">
+                <label class="upload-label" for="file">Select Kidney CT Image</label>
+                <input type="file" id="file" name="file" accept="image/*" required>
+            </div>
+
+            <button type="submit" class="btn">Predict</button>
+        </form>
+
+        {% if prediction %}
+        <div class="result-box">
+            <div class="result-title">Prediction Result</div>
+
+            <div class="center">
+                {% set pred_lower = prediction.lower() %}
+                <div class="prediction-pill
+                    {% if 'normal' in pred_lower %}pred-normal
+                    {% elif 'cyst' in pred_lower %}pred-cyst
+                    {% elif 'stone' in pred_lower %}pred-stone
+                    {% elif 'tumor' in pred_lower %}pred-tumor
+                    {% else %}pred-error
+                    {% endif %}">
+                    {{ prediction }}
+                </div>
+
+                {% if confidence is defined %}
+                <div class="confidence">
+                    Confidence: <span>{{ confidence }}%</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if probs %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Probability</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Normal</td>
+                        <td>{{ probs['Normal'] }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Cyst</td>
+                        <td>{{ probs['Cyst'] }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Stone</td>
+                        <td>{{ probs['Stone'] }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Tumor</td>
+                        <td>{{ probs['Tumor'] }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endif %}
+
+            <p class="note">
+                This prediction is generated by the trained kidney CT image classification model.
+                Use it as a support tool, not as a substitute for professional medical diagnosis.
+            </p>
+        </div>
+        {% endif %}
+
+        <a href="/" class="back-btn">Back to Home</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Malaria Detection | OpenHealth</title>
+    <style>
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:linear-gradient(135deg,#f4f7fb,#e8f0ff);
+            color:#1f2937;
+        }
+
+        .navbar{
+            background:#0f172a;
+            color:#fff;
+            padding:16px 28px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            box-shadow:0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        .navbar h1{
+            font-size:24px;
+        }
+
+        .navbar a{
+            color:white;
+            text-decoration:none;
+            background:#2563eb;
+            padding:10px 18px;
+            border-radius:10px;
+            font-weight:600;
+        }
+
+        .wrapper{
+            max-width:1200px;
+            margin:40px auto;
+            padding:0 20px;
+        }
+
+        .hero{
+            display:grid;
+            grid-template-columns:1.1fr 0.9fr;
+            gap:28px;
+            align-items:center;
+            margin-bottom:30px;
+        }
+
+        .hero-card,
+        .side-panel,
+        .card{
+            background:white;
+            border-radius:22px;
+            padding:30px;
+            box-shadow:0 12px 35px rgba(0,0,0,0.08);
+        }
+
+        .hero-card h2{
+            font-size:34px;
+            margin-bottom:14px;
+            color:#0f172a;
+        }
+
+        .hero-card p{
+            font-size:16px;
+            line-height:1.7;
+            color:#475569;
+            margin-bottom:14px;
+        }
+
+        .badge-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:16px;
+        }
+
+        .badge{
+            background:#dbeafe;
+            color:#1d4ed8;
+            padding:10px 14px;
+            border-radius:999px;
+            font-size:14px;
+            font-weight:600;
+        }
+
+        .side-panel{
+            background:linear-gradient(135deg,#2563eb,#1e40af);
+            color:white;
+        }
+
+        .side-panel h3{
+            font-size:26px;
+            margin-bottom:14px;
+        }
+
+        .side-panel ul{
+            padding-left:20px;
+            line-height:1.9;
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:28px;
+        }
+
+        .card h3{
+            font-size:24px;
+            margin-bottom:16px;
+            color:#0f172a;
+        }
+
+        .upload-box{
+            border:2px dashed #93c5fd;
+            border-radius:16px;
+            padding:24px;
+            background:#f8fbff;
+            text-align:center;
+            margin-bottom:18px;
+        }
+
+        input[type="file"]{
+            width:100%;
+            padding:12px;
+            border-radius:12px;
+            border:1px solid #cbd5e1;
+            background:white;
+            margin-bottom:18px;
+        }
+
+        .btn{
+            width:100%;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            color:white;
+            border:none;
+            padding:14px 18px;
+            border-radius:14px;
+            font-size:16px;
+            font-weight:700;
+            cursor:pointer;
+        }
+
+        .preview-img{
+            width:100%;
+            max-height:360px;
+            object-fit:contain;
+            border-radius:16px;
+            margin-top:16px;
+            border:1px solid #e2e8f0;
+            background:#f8fafc;
+            padding:8px;
+        }
+
+        .result-box{
+            border-radius:18px;
+            padding:22px;
+            margin-bottom:18px;
+        }
+
+        .result-positive{
+            background:#fff1f2;
+            border:1px solid #fecdd3;
+        }
+
+        .result-negative{
+            background:#ecfdf5;
+            border:1px solid #bbf7d0;
+        }
+
+        .result-neutral{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+        }
+
+        .result-box h4{
+            font-size:22px;
+            margin-bottom:10px;
+        }
+
+        .result-box p{
+            font-size:15px;
+            color:#475569;
+            line-height:1.6;
+        }
+
+        .prob-table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:14px;
+        }
+
+        .prob-table th,
+        .prob-table td{
+            padding:12px 14px;
+            text-align:left;
+            border-bottom:1px solid #e2e8f0;
+        }
+
+        .prob-table th{
+            background:#f8fafc;
+            color:#0f172a;
+        }
+
+        .error-box{
+            background:#fff7ed;
+            border:1px solid #fdba74;
+            color:#9a3412;
+            padding:16px;
+            border-radius:14px;
+            margin-bottom:18px;
+            font-weight:600;
+        }
+
+        .footer-note{
+            margin-top:28px;
+            background:#fff;
+            border-left:5px solid #2563eb;
+            padding:18px;
+            border-radius:16px;
+            box-shadow:0 8px 25px rgba(0,0,0,0.05);
+            color:#475569;
+            line-height:1.7;
+        }
+
+        @media (max-width: 992px){
+            .hero, .grid{
+                grid-template-columns:1fr;
+            }
+
+            .hero-card h2{
+                font-size:28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>OpenHealth</h1>
+    <a href="/">Back to Home</a>
+</div>
+
+<div class="wrapper">
+
+    <div class="hero">
+        <div class="hero-card">
+            <h2>Malaria Detection from Blood Smear Cell Images</h2>
+            <p>
+                Upload a blood smear cell image to screen whether the sample appears
+                <strong>Parasitized</strong> or <strong>Uninfected</strong> using a trained deep learning model.
+            </p>
+            <p>
+                This module is an AI-assisted screening tool and should support — not replace —
+                laboratory diagnosis and medical judgment.
+            </p>
+
+            <div class="badge-row">
+                <div class="badge">Deep Learning</div>
+                <div class="badge">MobileNetV2</div>
+                <div class="badge">Image Classification</div>
+                <div class="badge">Confidence Score</div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <h3>Model Output</h3>
+            <ul>
+                <li><strong>Parasitized</strong> → infected malaria cell image</li>
+                <li><strong>Uninfected</strong> → no malaria parasite pattern detected</li>
+                <li>Returns confidence score and class-wise probabilities</li>
+                <li>Designed for malaria cell image screening workflows</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Upload Malaria Cell Image</h3>
+
+            {% if error %}
+                <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="upload-box">
+                    Select a blood smear cell image for malaria prediction
+                </div>
+
+                <input type="file" name="image" accept=".png,.jpg,.jpeg,.bmp" required>
+                <button type="submit" class="btn">Predict Malaria</button>
+            </form>
+
+            {% if uploaded_image %}
+                <img src="/{{ uploaded_image }}" alt="Uploaded Image" class="preview-img">
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>Prediction Result</h3>
+
+            {% if prediction %}
+                {% if "infected" in prediction.lower() or "parasitized" in prediction.lower() %}
+                    <div class="result-box result-positive">
+                        <h4>{{ prediction }}</h4>
+                        <p>The uploaded image is predicted as a malaria-infected blood cell.</p>
+                        <p style="margin-top:10px;"><strong>Confidence:</strong> {{ confidence }}%</p>
+                    </div>
+                {% else %}
+                    <div class="result-box result-negative">
+                        <h4>{{ prediction }}</h4>
+                        <p>The uploaded image is predicted as an uninfected blood cell.</p>
+                        <p style="margin-top:10px;"><strong>Confidence:</strong> {{ confidence }}%</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="result-box result-neutral">
+                    <h4>No Prediction Yet</h4>
+                    <p>Upload a malaria cell image and click <strong>Predict Malaria</strong>.</p>
+                </div>
+            {% endif %}
+
+            {% if probabilities %}
+                <h3 style="margin-top: 12px;">Class-wise Probabilities</h3>
+                <table class="prob-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Probability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for label, prob in probabilities.items() %}
+                        <tr>
+                            <td>{{ label }}</td>
+                            <td>{{ prob }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <strong>Important:</strong> This malaria detection page is for educational and AI-assisted screening purposes only.
+        Final diagnosis must be made by qualified healthcare professionals.
+    </div>
+
+</div>
+
+</body>
+</html>

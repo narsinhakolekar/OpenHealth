@@ -1,73 +1,205 @@
 import os
 import sys
-import numpy as np
 import pandas as pd
+
 from src.logger import logging
 from dataclasses import dataclass
 from src.utils import save_object
+from src.exception import customexception
+
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from src.exception import customexception
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 
 @dataclass
 class DataTransformationConfig:
-    preprocessor_obj_file_path=os.path.join('Artifacts','Heart_Disease','Heart_Preprocessor.pkl')
+
+    preprocessor_obj_file_path = os.path.join(
+        'Artifacts',
+        'Heart_Disease',
+        'Heart_Preprocessor.pkl'
+    )
 
 
 class DataTransformation:
-    def __init__(self):
-        self.data_transformation_config=DataTransformationConfig()
-    
-    def get_data_transformation(self):
-        
-        try:
-            logging.info('Heart Disease Prediction: Data Transformation initiated')
-            numerical_cols = ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal']
-            logging.info(f'Heart Disease Prediction: Numerical Columns : {numerical_cols}')
-            logging.info('Heart Disease Prediction: Numerical Pipeline Initiated')
-            preprocessor = StandardScaler()
-            return preprocessor 
-        except Exception as e:
-            logging.info("Exception occured in the initiate_datatransformation")
-            raise customexception(e,sys)
-            
-    
-    def initialize_data_transformation(self,train_path,test_path):
-        try:
-            train_df=pd.read_csv(train_path)
-            test_df=pd.read_csv(test_path)
-            
-            logging.info("Heart Disease Prediction: Read train and test data complete")
-            logging.info(f'Heart Disease Prediction: Train Dataframe Head : \n{train_df.head().to_string()}')
-            logging.info(f'Heart Disease Prediction: Test Dataframe Head : \n{test_df.head().to_string()}')
-            
-            preprocessing_obj = self.get_data_transformation()
-            
-            target_column_name = 'target'
-            drop_columns = [target_column_name]
-            
-            x_train = train_df.drop(columns=drop_columns,axis=1)
-            y_train=train_df[target_column_name]  
 
-            x_test=test_df.drop(columns=drop_columns,axis=1)
-            y_test=test_df[target_column_name]
-            logging.info("Heart Disease Prediction: Splitting input and target features complete")
-            
-            preprocessed_x_train=preprocessing_obj.fit_transform(x_train)
-            preprocessed_x_test =preprocessing_obj.transform(x_test)
-            logging.info("Heart Disease Prediction: Applying preprocessing object on training and testing datasets.")
+    def __init__(self):
+
+        self.data_transformation_config = DataTransformationConfig()
+
+
+    def get_data_transformation(self):
+
+        try:
+
+            logging.info(
+                "Heart Disease Prediction: Data Transformation initiated"
+            )
+
+
+            numerical_cols = [
+                'Age',
+                'RestingBP',
+                'Cholesterol',
+                'FastingBS',
+                'MaxHR',
+                'Oldpeak'
+            ]
+
+
+            categorical_cols = [
+                'Sex',
+                'ChestPainType',
+                'RestingECG',
+                'ExerciseAngina',
+                'ST_Slope'
+            ]
+
+
+            numerical_pipeline = Pipeline(
+                steps=[
+                    (
+                        "imputer",
+                        SimpleImputer(strategy="median")
+                    ),
+                    (
+                        "scaler",
+                        StandardScaler()
+                    )
+                ]
+            )
+
+
+            categorical_pipeline = Pipeline(
+                steps=[
+                    (
+                        "imputer",
+                        SimpleImputer(strategy="most_frequent")
+                    ),
+                    (
+                        "one_hot_encoder",
+                        OneHotEncoder(
+                            handle_unknown="ignore"
+                        )
+                    )
+                ]
+            )
+
+
+            preprocessor = ColumnTransformer(
+                transformers=[
+                    (
+                        "numerical_pipeline",
+                        numerical_pipeline,
+                        numerical_cols
+                    ),
+                    (
+                        "categorical_pipeline",
+                        categorical_pipeline,
+                        categorical_cols
+                    )
+                ]
+            )
+
+
+            return preprocessor
+
+
+        except Exception as e:
+
+            logging.info(
+                "Exception occurred in get_data_transformation"
+            )
+
+            raise customexception(e, sys)
+
+
+
+    def initialize_data_transformation(
+            self,
+            train_path,
+            test_path
+    ):
+
+        try:
+
+            train_df = pd.read_csv(train_path)
+
+            test_df = pd.read_csv(test_path)
+
+
+            logging.info(
+                "Heart Disease Prediction: Train and Test data loaded"
+            )
+
+
+            preprocessing_obj = self.get_data_transformation()
+
+
+            target_column_name = "HeartDisease"
+
+
+            X_train = train_df.drop(
+                columns=[target_column_name],
+                axis=1
+            )
+
+            y_train = train_df[target_column_name]
+
+
+            X_test = test_df.drop(
+                columns=[target_column_name],
+                axis=1
+            )
+
+            y_test = test_df[target_column_name]
+
+
+            logging.info(
+                "Heart Disease Prediction: Input and target separated"
+            )
+
+
+            X_train = preprocessing_obj.fit_transform(
+                X_train
+            )
+
+
+            X_test = preprocessing_obj.transform(
+                X_test
+            )
+
+
+            logging.info(
+                "Heart Disease Prediction: Preprocessing completed"
+            )
 
 
             save_object(
                 file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=preprocessing_obj)
-            
-            logging.info("Heart Disease Prediction: Preprocessing pickle file saved")
-            return (preprocessed_x_train,y_train,preprocessed_x_test,y_test)
-            
+                obj=preprocessing_obj
+            )
+
+
+            logging.info(
+                "Heart Preprocessor saved successfully"
+            )
+
+
+            return (
+                X_train,
+                X_test,
+                y_train,
+                y_test
+            )
+
+
         except Exception as e:
-            logging.info("Exception occured in the initiate_datatransformation")
-            raise customexception(e,sys)
+
+            logging.info(
+                "Exception occurred in initialize_data_transformation"
+            )
+
+            raise customexception(e, sys)

@@ -1,0 +1,23 @@
+artifact_path: file:///C:/Users/narsi/Desktop/Coding/projects/OpenHealth/mlruns/0/models/m-bd5c1e2c01c34665a340fb5b8b34ed6e/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.10.20
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.7.2
+    skops_trusted_types: null
+mlflow_version: 3.14.0
+model_id: m-bd5c1e2c01c34665a340fb5b8b34ed6e
+model_size_bytes: 36079
+model_uuid: m-bd5c1e2c01c34665a340fb5b8b34ed6e
+prompts: null
+run_id: 323528078f32482dba4cf52b3cc56a75
+utc_time_created: '2026-07-07 15:40:42.771519'

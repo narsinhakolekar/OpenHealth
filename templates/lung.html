@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>OpenHealth | Lung Disease Prediction</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:
+                linear-gradient(rgba(7, 12, 25, 0.78), rgba(7, 12, 25, 0.88)),
+                url("{{ url_for('static', filename='images/lung_bg.jpg') }}") center/cover no-repeat fixed;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:30px 16px;
+            color:#fff;
+        }
+
+        .page-wrapper{
+            width:100%;
+            max-width:980px;
+        }
+
+        .main-card{
+            background:rgba(255,255,255,0.10);
+            backdrop-filter:blur(18px);
+            -webkit-backdrop-filter:blur(18px);
+            border:1px solid rgba(255,255,255,0.18);
+            border-radius:28px;
+            box-shadow:0 18px 45px rgba(0,0,0,0.35);
+            overflow:hidden;
+        }
+
+        .header{
+            padding:28px 28px 18px;
+            border-bottom:1px solid rgba(255,255,255,0.10);
+            display:flex;
+            align-items:center;
+            gap:18px;
+            flex-wrap:wrap;
+        }
+
+        .icon-wrap{
+            width:78px;
+            height:78px;
+            border-radius:22px;
+            background:rgba(255,255,255,0.12);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10);
+            flex-shrink:0;
+            overflow:hidden;
+        }
+
+        .icon-wrap img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .header-text{
+            flex:1;
+            min-width:250px;
+        }
+
+        .header-text h1{
+            font-size:2rem;
+            font-weight:800;
+            letter-spacing:0.2px;
+            color:#ffffff;
+            margin-bottom:8px;
+        }
+
+        .header-text p{
+            font-size:0.98rem;
+            line-height:1.6;
+            color:#d8e3f0;
+            max-width:720px;
+        }
+
+        .content{
+            padding:28px;
+            display:grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap:24px;
+        }
+
+        .left-panel,
+        .right-panel{
+            background:rgba(255,255,255,0.08);
+            border:1px solid rgba(255,255,255,0.10);
+            border-radius:24px;
+            padding:24px;
+            box-shadow:inset 0 0 0 1px rgba(255,255,255,0.03);
+        }
+
+        .section-title{
+            font-size:1.18rem;
+            font-weight:700;
+            color:#ffffff;
+            margin-bottom:16px;
+        }
+
+        .section-subtitle{
+            font-size:0.95rem;
+            color:#cbd5e1;
+            line-height:1.6;
+            margin-bottom:18px;
+        }
+
+        .upload-box{
+            border:2px dashed rgba(255,255,255,0.20);
+            background:rgba(255,255,255,0.05);
+            border-radius:20px;
+            padding:24px;
+            text-align:center;
+            transition:0.25s ease;
+        }
+
+        .upload-box:hover{
+            border-color:rgba(96,165,250,0.55);
+            background:rgba(255,255,255,0.08);
+        }
+
+        .upload-label{
+            display:block;
+            font-size:1rem;
+            font-weight:700;
+            color:#f8fafc;
+            margin-bottom:14px;
+        }
+
+        .upload-note{
+            font-size:0.90rem;
+            color:#cbd5e1;
+            margin-bottom:16px;
+            line-height:1.5;
+        }
+
+        input[type="file"]{
+            width:100%;
+            background:rgba(255,255,255,0.08);
+            border:1px solid rgba(255,255,255,0.12);
+            color:#fff;
+            border-radius:14px;
+            padding:12px;
+            outline:none;
+            cursor:pointer;
+        }
+
+        input[type="file"]::file-selector-button{
+            border:none;
+            background:linear-gradient(135deg, #0ea5e9, #2563eb);
+            color:#fff;
+            padding:10px 16px;
+            border-radius:10px;
+            margin-right:14px;
+            cursor:pointer;
+            font-weight:600;
+        }
+
+        .btn{
+            width:100%;
+            margin-top:18px;
+            border:none;
+            outline:none;
+            padding:15px 18px;
+            border-radius:16px;
+            font-size:1rem;
+            font-weight:800;
+            color:#fff;
+            background:linear-gradient(135deg, #06b6d4, #2563eb, #1d4ed8);
+            cursor:pointer;
+            transition:0.28s ease;
+            box-shadow:0 10px 25px rgba(37,99,235,0.28);
+        }
+
+        .btn:hover{
+            transform:translateY(-2px);
+            box-shadow:0 14px 30px rgba(37,99,235,0.35);
+        }
+
+        .info-cards{
+            margin-top:20px;
+            display:grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap:14px;
+        }
+
+        .mini-card{
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .mini-card h4{
+            font-size:0.98rem;
+            color:#ffffff;
+            margin-bottom:8px;
+        }
+
+        .mini-card p{
+            font-size:0.90rem;
+            color:#cbd5e1;
+            line-height:1.5;
+        }
+
+        .result-card{
+            min-height:100%;
+            display:flex;
+            flex-direction:column;
+        }
+
+        .result-empty{
+            flex:1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            border:2px dashed rgba(255,255,255,0.14);
+            border-radius:20px;
+            padding:28px;
+            color:#cbd5e1;
+            background:rgba(255,255,255,0.04);
+            line-height:1.7;
+        }
+
+        .preview-wrap{
+            width:100%;
+            display:flex;
+            justify-content:center;
+            margin-bottom:18px;
+        }
+
+        .preview-image{
+            width:100%;
+            max-width:320px;
+            max-height:300px;
+            object-fit:cover;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,0.15);
+            box-shadow:0 10px 24px rgba(0,0,0,0.25);
+        }
+
+        .result-badge{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:12px 16px;
+            border-radius:16px;
+            background:linear-gradient(135deg, rgba(14,165,233,0.18), rgba(37,99,235,0.18));
+            border:1px solid rgba(96,165,250,0.30);
+            margin-bottom:16px;
+            font-weight:700;
+            color:#e0f2fe;
+            width:fit-content;
+        }
+
+        .prediction-box{
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.10);
+            border-radius:18px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .prediction-title{
+            font-size:0.95rem;
+            color:#cbd5e1;
+            margin-bottom:8px;
+        }
+
+        .prediction-value{
+            font-size:1.45rem;
+            font-weight:800;
+            color:#fef08a;
+            margin-bottom:12px;
+            word-break:break-word;
+        }
+
+        .confidence-pill{
+            display:inline-block;
+            padding:10px 14px;
+            border-radius:999px;
+            background:rgba(34,197,94,0.14);
+            border:1px solid rgba(34,197,94,0.28);
+            color:#dcfce7;
+            font-weight:700;
+            font-size:0.96rem;
+        }
+
+        .probability-card{
+            margin-top:10px;
+            background:rgba(255,255,255,0.05);
+            border-radius:18px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,0.08);
+        }
+
+        .probability-header{
+            padding:14px 16px;
+            font-weight:700;
+            color:#fff;
+            background:rgba(255,255,255,0.08);
+            border-bottom:1px solid rgba(255,255,255,0.08);
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td{
+            padding:13px 16px;
+            text-align:left;
+            font-size:0.95rem;
+        }
+
+        th{
+            color:#f8fafc;
+            background:rgba(255,255,255,0.06);
+        }
+
+        td{
+            color:#dbeafe;
+            border-top:1px solid rgba(255,255,255,0.06);
+        }
+
+        tr:hover td{
+            background:rgba(255,255,255,0.04);
+        }
+
+        .error-box{
+            margin-top:14px;
+            padding:14px 16px;
+            border-radius:14px;
+            background:rgba(239,68,68,0.14);
+            border:1px solid rgba(239,68,68,0.25);
+            color:#fecaca;
+            font-weight:600;
+            line-height:1.5;
+        }
+
+        .footer{
+            padding:0 28px 28px;
+        }
+
+        .back-btn{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            text-decoration:none;
+            color:#bfdbfe;
+            font-weight:700;
+            padding:12px 16px;
+            border-radius:14px;
+            background:rgba(255,255,255,0.08);
+            border:1px solid rgba(255,255,255,0.10);
+            transition:0.25s ease;
+        }
+
+        .back-btn:hover{
+            background:rgba(255,255,255,0.12);
+            transform:translateY(-1px);
+        }
+
+        @media (max-width: 920px){
+            .content{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media (max-width: 640px){
+            .header{
+                padding:22px 18px 16px;
+            }
+
+            .content{
+                padding:18px;
+                gap:18px;
+            }
+
+            .left-panel,
+            .right-panel{
+                padding:18px;
+                border-radius:20px;
+            }
+
+            .footer{
+                padding:0 18px 18px;
+            }
+
+            .header-text h1{
+                font-size:1.55rem;
+            }
+
+            .info-cards{
+                grid-template-columns:1fr;
+            }
+
+            th, td{
+                padding:11px 12px;
+                font-size:0.90rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="main-card">
+            <div class="header">
+                <div class="icon-wrap">
+                    <img src="{{ url_for('static', filename='images/lung_icon.jpg') }}" alt="Lung Icon">
+                </div>
+                <div class="header-text">
+                    <h1>Lung Disease X-ray Classification</h1>
+                    <p>
+                        Upload a lung X-ray image to classify it into one of the supported categories:
+                        <strong>Bacterial Pneumonia</strong>, <strong>Corona Virus Disease</strong>,
+                        <strong>Normal</strong>, <strong>Tuberculosis</strong>, or
+                        <strong>Viral Pneumonia</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- LEFT PANEL -->
+                <div class="left-panel">
+                    <div class="section-title">Upload X-ray Image</div>
+                    <div class="section-subtitle">
+                        Choose a clear lung X-ray image. The model will analyze the image and return the
+                        predicted class along with confidence and class-wise probabilities.
+                    </div>
+
+                    <form action="/lung" method="POST" enctype="multipart/form-data">
+                        <div class="upload-box">
+                            <label class="upload-label" for="file">Select Lung X-ray Image</label>
+                            <div class="upload-note">
+                                Supported input: JPG / JPEG / PNG lung X-ray scans
+                            </div>
+                            <input type="file" name="file" id="file" accept="image/*" required>
+                        </div>
+
+                        <button type="submit" class="btn">Predict Lung Disease</button>
+                    </form>
+
+                    {% if error %}
+                    <div class="error-box">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <div class="info-cards">
+                        <div class="mini-card">
+                            <h4>Supported Classes</h4>
+                            <p>
+                                Bacterial Pneumonia, Corona Virus Disease, Normal,
+                                Tuberculosis, Viral Pneumonia
+                            </p>
+                        </div>
+
+                        <div class="mini-card">
+                            <h4>Model Output</h4>
+                            <p>
+                                The system displays predicted class, confidence score,
+                                and complete probability distribution for all classes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL -->
+                <div class="right-panel result-card">
+                    <div class="section-title">Prediction Result</div>
+
+                    {% if prediction %}
+                        <div class="result-badge">AI Prediction Ready</div>
+
+                        {% if image_path %}
+                        <div class="preview-wrap">
+                            <img src="{{ image_path }}" alt="Uploaded Lung X-ray" class="preview-image">
+                        </div>
+                        {% endif %}
+
+                        <div class="prediction-box">
+                            <div class="prediction-title">Predicted Disease Category</div>
+                            <div class="prediction-value">{{ prediction }}</div>
+                            <div class="confidence-pill">Confidence: {{ confidence }}%</div>
+                        </div>
+
+                        {% if probabilities %}
+                        <div class="probability-card">
+                            <div class="probability-header">Class-wise Probability Distribution</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Probability</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in probabilities %}
+                                    <tr>
+                                        <td>{{ item.class_name }}</td>
+                                        <td>{{ item.probability }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="result-empty">
+                            Upload a lung X-ray image and click <strong>Predict Lung Disease</strong> to view
+                            the model prediction, confidence score, and class-wise probability table here.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="footer">
+                <a href="/" class="back-btn">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Disease Prediction</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #111827;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 32px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #1f2937;
+            color: white;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .form-group input:focus {
+            border-color: #60a5fa;
+        }
+
+        .btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 14px;
+            border-radius: 12px;
+            background: #1e40af;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Parkinson's Disease Prediction</h1>
+
+        <form action="/parkinsons" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="MDVPFO">MDVP:Fo(Hz)</label>
+                    <input type="number" step="any" name="MDVPFO" id="MDVPFO" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="MDVPFHI">MDVP:Fhi(Hz)</label>
+                    <input type="number" step="any" name="MDVPFHI" id="MDVPFHI" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="MDVPFLO">MDVP:Flo(Hz)</label>
+                    <input type="number" step="any" name="MDVPFLO" id="MDVPFLO" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="MDVPJ">MDVP:Jitter(%)</label>
+                    <input type="number" step="any" name="MDVPJ" id="MDVPJ" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="RPDE">RPDE</label>
+                    <input type="number" step="any" name="RPDE" id="RPDE" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="DFA">DFA</label>
+                    <input type="number" step="any" name="DFA" id="DFA" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="spread2">spread2</label>
+                    <input type="number" step="any" name="spread2" id="spread2" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="D2">D2</label>
+                    <input type="number" step="any" name="D2" id="D2" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Predict</button>
+        </form>
+
+        {% if final_result %}
+            <div class="result">
+                Prediction Result: {{ final_result }}
+            </div>
+        {% endif %}
+
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+</body>
+</html>

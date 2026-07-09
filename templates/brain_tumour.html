@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brain Tumor Detection | OpenHealth</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                linear-gradient(rgba(10, 15, 35, 0.78), rgba(10, 15, 35, 0.86)),
+                url("{{ url_for('static', filename='images/brain_bg.jpg') }}") no-repeat center center/cover;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 28px;
+            padding: 34px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .icon-box {
+            width: 78px;
+            height: 78px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.14);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+        }
+
+        .icon-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #d7e7ff;
+            line-height: 1.7;
+            margin-bottom: 22px;
+            max-width: 95%;
+        }
+
+        .info-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .pill {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            color: #eef6ff;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        .right-panel {
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 22px;
+            padding: 26px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-desc {
+            color: #d9e7ff;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            border: 2px dashed rgba(255,255,255,0.25);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+            background: rgba(255,255,255,0.06);
+            margin-bottom: 18px;
+            transition: 0.3s ease;
+        }
+
+        .upload-box:hover {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(255,255,255,0.35);
+        }
+
+        .upload-label {
+            display: block;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #4cc9f0, #4361ee);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .predict-btn {
+            width: 100%;
+            border: none;
+            outline: none;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            box-shadow: 0 12px 28px rgba(0, 114, 255, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 34px rgba(0, 114, 255, 0.42);
+        }
+
+        .bottom-section {
+            padding: 0 34px 34px;
+        }
+
+        .result-card {
+            margin-top: 8px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 22px;
+            padding: 28px;
+        }
+
+        .result-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .result-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+        }
+
+        .result-subtitle {
+            color: #d7e7ff;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .prediction-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            background: linear-gradient(135deg, rgba(67,97,238,0.95), rgba(0,198,255,0.95));
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .stat-label {
+            color: #cfe3ff;
+            font-size: 0.92rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
+
+        .table-card {
+            margin-top: 22px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .table-title {
+            padding: 16px 18px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: rgba(255,255,255,0.05);
+            color: #eef5ff;
+            font-weight: 700;
+        }
+
+        tr {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            color: #dceaff;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-weight: 700;
+            transition: 0.25s ease;
+        }
+
+        .home-btn {
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #fff;
+        }
+
+        .home-btn:hover {
+            background: rgba(255,255,255,0.16);
+            transform: translateY(-1px);
+        }
+
+        .info-btn {
+            background: linear-gradient(135deg, #ff7b00, #ff3d00);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(255, 98, 0, 0.28);
+        }
+
+        .info-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(255, 98, 0, 0.35);
+        }
+
+        .placeholder-box {
+            margin-top: 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px dashed rgba(255,255,255,0.20);
+            border-radius: 18px;
+            padding: 26px;
+            text-align: center;
+            color: #dce9ff;
+            line-height: 1.7;
+        }
+
+        .support-box {
+            margin-top: 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .support-box h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .support-box p {
+            color: #d9e7ff;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .classes-list {
+            margin-top: 10px;
+            color: #eef5ff;
+            font-weight: 600;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 960px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            .hero,
+            .bottom-section {
+                padding: 20px;
+            }
+
+            .right-panel,
+            .result-card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .icon-box {
+                width: 64px;
+                height: 64px;
+            }
+
+            th, td {
+                padding: 12px 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="glass-card">
+
+        <!-- Top section -->
+        <div class="hero">
+            <div class="left-panel">
+                <div class="title-row">
+                    <div class="icon-box">
+                        <img src="{{ url_for('static', filename='images/brain_icon.jpg') }}" alt="Brain Tumor Icon">
+                    </div>
+                    <div>
+                        <h1>Brain Tumor MRI Classification</h1>
+                    </div>
+                </div>
+
+                <p class="subtitle">
+                    Upload a brain MRI scan to classify it into one of the supported categories:
+                    <strong>Glioma Tumor</strong>, <strong>Meningioma Tumor</strong>,
+                    <strong>No Tumor</strong>, or <strong>Pituitary Tumor</strong>.
+                    The model will return the predicted class, confidence score, and class-wise probability distribution.
+                </p>
+
+                <div class="info-strip">
+                    <span class="pill">MRI-based Detection</span>
+                    <span class="pill">4 Brain Classes</span>
+                    <span class="pill">Confidence + Probability Table</span>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="section-title">Upload MRI Image</div>
+                <div class="section-desc">
+                    Choose a clear brain MRI image. Supported formats:
+                    <strong>JPG / JPEG / PNG</strong>.
+                </div>
+
+                <form action="/brain" method="POST" enctype="multipart/form-data">
+                    <div class="upload-box">
+                        <label class="upload-label" for="file">Select Brain MRI Image</label>
+                        <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png" required>
+                    </div>
+
+                    <button type="submit" class="predict-btn">Predict Brain Tumor</button>
+                </form>
+
+                <div class="support-box">
+                    <h3>Supported Classes</h3>
+                    <p class="classes-list">
+                        Glioma Tumor<br>
+                        Meningioma Tumor<br>
+                        No Tumor<br>
+                        Pituitary Tumor
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom result section -->
+        <div class="bottom-section">
+            <div class="result-card">
+                <div class="result-header">
+                    <div>
+                        <div class="result-title">Prediction Result</div>
+                        <div class="result-subtitle">
+                            The system displays the predicted class, confidence score, and full probability breakdown for all supported brain tumor classes.
+                        </div>
+                    </div>
+
+                    {% if prediction and "Error" not in prediction and prediction != "No file uploaded." and prediction != "No file selected." and prediction != "Brain tumor model not available." %}
+                        <div class="prediction-badge">{{ prediction }}</div>
+                    {% endif %}
+                </div>
+
+                {% if prediction %}
+                    {% if "Error" in prediction or prediction == "No file uploaded." or prediction == "No file selected." or prediction == "Brain tumor model not available." %}
+                        <div class="placeholder-box">
+                            {{ prediction }}
+                        </div>
+                    {% else %}
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Predicted Class</div>
+                                <div class="stat-value">{{ prediction }}</div>
+                            </div>
+
+                            <div class="stat-box">
+                                <div class="stat-label">Confidence</div>
+                                <div class="stat-value">
+                                    {% if confidence is not none %}
+                                        {{ confidence }} %
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if probabilities %}
+                        <div class="table-card">
+                            <div class="table-title">Class-wise Probability Distribution</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Probability</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cls, prob in probabilities.items() %}
+                                    <tr>
+                                        <td>{{ cls }}</td>
+                                        <td>{{ prob }} %</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        <div class="action-row">
+                            {% if more_info_url %}
+                                <a href="{{ more_info_url }}" class="action-btn info-btn">More Info</a>
+                            {% endif %}
+                            <a href="/" class="action-btn home-btn">← Back to Home</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="placeholder-box">
+                        Upload a brain MRI image and click <strong>Predict Brain Tumor</strong> to view the
+                        model prediction, confidence score, and class-wise probability table here.
+                    </div>
+
+                    <div class="action-row">
+                        <a href="/" class="action-btn home-btn">← Back to Home</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

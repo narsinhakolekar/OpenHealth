@@ -1,79 +1,101 @@
 import os
 import sys
 import pandas as pd
-from src.logger import logging
+
 from src.utils import load_object
 from src.exception import customexception
 
+
+
 class PredictPipeline:
-    def __init__(self):
-        pass
-    
+
     def predict(self,features):
+
         try:
-            preprocessor_path=os.path.join("Artifacts","Heart_Disease","Heart_Preprocessor.pkl")
-            model_path=os.path.join("Artifacts","Heart_Disease","Heart_Model.pkl")
+
+            preprocessor_path=os.path.join(
+                "Artifacts",
+                "Heart_Disease",
+                "Heart_Preprocessor.pkl"
+            )
+
+            model_path=os.path.join(
+                "Artifacts",
+                "Heart_Disease",
+                "Heart_Model.pkl"
+            )
+
+
             preprocessor=load_object(preprocessor_path)
+
             model=load_object(model_path)
-            scaled_data=preprocessor.transform(features)
-            pred=model.predict(scaled_data)
-            return pred
+
+
+            data=preprocessor.transform(features)
+
+
+            prediction=model.predict(data)
+
+
+            return prediction
+
 
         except Exception as e:
             raise customexception(e,sys)
-    
+
+
+
+
+
 class CustomData:
-    def __init__(self,
-                 age:int,
-                 sex:int,
-                 cp:int,
-                 trestbps:int,
-                 chol:int,
-                 fbs:int,
-                 restecg:int,
-                 thalach:int,
-                 exang:int,
-                 oldpeak:float,
-                 slope:int,
-                 ca:int,
-                 thal:int):
-        
-        self.age = age
-        self.sex = sex
-        self.cp = cp
-        self.trestbps = trestbps
-        self.chol = chol
-        self.fbs = fbs
-        self.restecg = restecg
-        self.thalach = thalach
-        self.exang = exang
-        self.oldpeak = oldpeak
-        self.slope = slope
-        self.ca = ca
-        self.thal = thal
-            
-                
+
+    def __init__(
+        self,
+        Age,
+        Sex,
+        ChestPainType,
+        RestingBP,
+        Cholesterol,
+        FastingBS,
+        RestingECG,
+        MaxHR,
+        ExerciseAngina,
+        Oldpeak,
+        ST_Slope
+    ):
+
+        self.Age=Age
+        self.Sex=Sex
+        self.ChestPainType=ChestPainType
+        self.RestingBP=RestingBP
+        self.Cholesterol=Cholesterol
+        self.FastingBS=FastingBS
+        self.RestingECG=RestingECG
+        self.MaxHR=MaxHR
+        self.ExerciseAngina=ExerciseAngina
+        self.Oldpeak=Oldpeak
+        self.ST_Slope=ST_Slope
+
+
+
+
     def get_data_as_dataframe(self):
-            try:
-                custom_data_input_dict = {
-                    'age':[self.age],
-                    'sex':[self.sex],
-                    'cp':[self.cp],
-                    'trestbps':[self.trestbps],
-                    'chol':[self.chol],
-                    'fbs':[self.fbs],
-                    'restecg':[self.restecg],
-                    'thalach':[self.thalach],
-                    'exang':[self.exang],
-                    'oldpeak':[self.oldpeak],
-                    'slope':[self.slope],
-                    'ca':[self.ca],
-                    'thal':[self.thal]
-                }
-                df = pd.DataFrame(custom_data_input_dict)
-                print(df)
-                logging.info('Dataframe Gathered')
-                return df
-            except Exception as e:
-                logging.info('Exception Occured in prediction pipeline')
-                raise customexception(e,sys)
+
+        data={
+
+            "Age":[self.Age],
+            "Sex":[self.Sex],
+            "ChestPainType":[self.ChestPainType],
+            "RestingBP":[self.RestingBP],
+            "Cholesterol":[self.Cholesterol],
+            "FastingBS":[self.FastingBS],
+            "RestingECG":[self.RestingECG],
+            "MaxHR":[self.MaxHR],
+            "ExerciseAngina":[self.ExerciseAngina],
+            "Oldpeak":[self.Oldpeak],
+            "ST_Slope":[self.ST_Slope]
+
+        }
+
+
+        return pd.DataFrame(data)
