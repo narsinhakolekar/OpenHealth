@@ -171,3 +171,11 @@ static/uploads/
 Thumbs.db
 .DS_Store
 .vscode/
+
+Notebook_Experiments/Data/
+mlruns/
+mlflow.db
+temp_uploads/
+static/uploads/
+__pycache__/
+*.pyc
