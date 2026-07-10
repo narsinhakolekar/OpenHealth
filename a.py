@@ -7,6 +7,7 @@ import cv2
 import pickle
 import subprocess
 import numpy as np
+
 from PIL import Image
 from tensorflow.keras.models import load_model
 from werkzeug.utils import secure_filename
@@ -21,14 +22,12 @@ from OpenHealth.DiseaseDetection.Liver_Disease_Prediction.pipelines.Prediction_p
 
 import google.generativeai as genai
 
-
 # =========================================================
 # APP
 # =========================================================
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 
 # =========================================================
 # HELPERS
@@ -112,6 +111,8 @@ def format_malaria_result(predicted_class):
     if str(predicted_class).lower() == "parasitized":
         return "Malaria Infected (Parasitized)"
     return "Uninfected / No Malaria Detected"
+
+
 
 
 # =========================================================
