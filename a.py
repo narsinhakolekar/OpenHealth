@@ -1,93 +1,9 @@
-# import warnings
-# warnings.simplefilter('ignore')
-# import uuid
-# import shutil
-# import os
-# import cv2
-# import sys
-# import pickle
-# import subprocess
-# import numpy as np
-# from PIL import Image
-# from tensorflow.keras.models import load_model
-
-
-
-# from werkzeug.utils import secure_filename
-
-# from flask import Flask, render_template, request, redirect, url_for
-
-# from flask import Flask, render_template, request
-# from OpenHealth.DiseaseDetection.Malaria_Prediction.pipelines.Prediction_pipeline import PredictionPipeline as MalariaPredictionPipeline
-# from OpenHealth.DiseaseDetection.Diabetes_Disease_Prediction.pipelines.Prediction_pipeline import Diabetes_Data, PredictDiabetes
-# from OpenHealth.DiseaseDetection.Heart_Disease_Prediction.pipelines.Prediction_pipeline import CustomData, PredictPipeline
-# from OpenHealth.DiseaseDetection.Breast_Cancer_Prediction.pipelines.Prediction_pipeline import PredictBCancer, BCancer_Data
-# from OpenHealth.DiseaseDetection.Parkinsons_Disease_Prediction.pipelines.Prediction_pipeline import PredictParkinsons, Parkinsons_Data
-# from OpenHealth.DiseaseDetection.Liver_Disease_Prediction.pipelines.Prediction_pipeline import LiverData, PredictLiver
-
-# # from OpenHealth.DiseaseDetection.Brain_Tumor_Detection.pipelines.Prediction_pipeline import PredictBrainTumour
-# # kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
-# # kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
-
-# kidney_model = None
-# kidney_model_path = os.path.join("Artifacts", "Kidney_Disease", "Kidney_Model.h5")
-# if os.path.exists(kidney_model_path):
-#     kidney_model = load_model(kidney_model_path)
-
-# # ---------------------------------------------------
-# # LUNG MODEL
-# # ---------------------------------------------------
-# # lung_model = None
-# # lung_model_path = os.path.join("Artifacts", "Lung_Disease", "Lung_Model.h5")
-# # if os.path.exists(lung_model_path):
-# #     lung_model = load_model(lung_model_path)
-# #     print(f"[INFO] Lung model loaded from: {lung_model_path}")
-# # else:
-# #     print(f"[WARNING] Lung model not found at: {lung_model_path}")
-
-# lung_model = load_model(r'Artifacts\Lung_Disease\Lung_Model.h5')
-
-
-# # =========================
-# # Brain Tumour model loader
-# # =========================
-# brain_model = None
-
-# try:
-#     brain_model_path = os.path.join("Artifacts", "Brain_Tumour", "BrainModel.h5")
-#     if os.path.exists(brain_model_path):
-#         brain_model = load_model(brain_model_path)
-#         print("Brain Tumour model loaded successfully.")
-#     else:
-#         print(f"Brain Tumour model not found at: {brain_model_path}")
-# except Exception as e:
-#     brain_model = None
-#     print(f"Brain Tumour model loading failed: {e}")
-
-
-# Missing model artifacts -> disable for now
-# brain_model = load_model(r'Artifacts\Brain_Tumour\BrainModel.h5')
-# kidney_model = load_model(r'Artifacts\Kidney_Disease\Kidney_Model.h5')
-# livermodel = pickle.load(open(r'Artifacts\Liver_Disease\Liver_Model.pkl', 'rb'))
-# from src.utils import gen_from_image, gen_from_text, get_med
-# from flask import Flask, render_template,request,redirect,url_for
-# from src.Multi_Disease_System.Parkinsons_Disease_Prediction.pipelines.Prediction_pipeline import Parkinsons_Data, PredictParkinsons
-# from src.Multi_Disease_System.Breast_Cancer_Prediction.pipelines.Prediction_pipeline import BCancer_Data, PredictBCancer
-# from src.Multi_Disease_System.Diabetes_Disease_Prediction.pipelines.Prediction_pipeline import Diabetes_Data, PredictDiabetes
-# from src.Multi_Disease_System.Heart_Disease_Prediction.pipelines.Prediction_pipeline import CustomData, PredictPipeline
-# brain_model = load_model('Artifacts\Brain_Tumour\BrainModel.h5')
-# kidney_model = load_model('Artifacts\Kidney_Disease\Kidney_Model.h5')
-# #lung_model = load_model('Artifacts\Lung_Disease\Lung_Model.h5')
-# livermodel = pickle.load(open('Artifacts\Liver_Disease\Liver_Model.pkl', 'rb'))
-# #liverpreprocessor = pickle.load(open('Artifacts\Liver_Disease\Liver_Preprocessor.pkl', 'rb'))
-
 import warnings
 warnings.simplefilter('ignore')
-import uuid
-import shutil
+
 import os
+import uuid
 import cv2
-import sys
 import pickle
 import subprocess
 import numpy as np
@@ -103,63 +19,120 @@ from OpenHealth.DiseaseDetection.Breast_Cancer_Prediction.pipelines.Prediction_p
 from OpenHealth.DiseaseDetection.Parkinsons_Disease_Prediction.pipelines.Prediction_pipeline import PredictParkinsons, Parkinsons_Data
 from OpenHealth.DiseaseDetection.Liver_Disease_Prediction.pipelines.Prediction_pipeline import LiverData, PredictLiver
 
-app = Flask(__name__)
+import google.generativeai as genai
+
 
 # =========================================================
-# SAFE MODEL LOADER
+# APP
 # =========================================================
+app = Flask(__name__)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+# =========================================================
+# HELPERS
+# =========================================================
+def abs_path(*parts):
+    return os.path.join(BASE_DIR, *parts)
+
+
 def safe_load_keras_model(model_path, model_name):
+    print("\n" + "=" * 80)
+    print(f"[MODEL CHECK] {model_name}")
+    print(f"[MODEL CHECK] Expected path: {model_path}")
+    print(f"[MODEL CHECK] Exists? {os.path.exists(model_path)}")
+
+    if os.path.exists(model_path):
+        try:
+            print(f"[MODEL CHECK] File size: {os.path.getsize(model_path)} bytes")
+        except Exception as e:
+            print(f"[MODEL CHECK] Could not read file size: {e}")
+
     try:
         if os.path.exists(model_path):
             model = load_model(model_path, compile=False)
-            print(f"[INFO] {model_name} model loaded from: {model_path}")
+            print(f"[SUCCESS] {model_name} model loaded successfully.")
+            print("=" * 80 + "\n")
             return model
         else:
-            print(f"[WARNING] {model_name} model not found at: {model_path}")
+            print(f"[FAILED] {model_name} model file not found.")
+            print("=" * 80 + "\n")
             return None
     except Exception as e:
-        print(f"[ERROR] Failed to load {model_name} model: {e}")
+        print(f"[FAILED] {model_name} model load error: {e}")
+        print("=" * 80 + "\n")
         return None
 
 
 # =========================================================
 # LOAD IMAGE MODELS
 # =========================================================
-kidney_model_path = os.path.join("Artifacts", "Kidney_Disease", "Kidney_Model.h5")
-lung_model_path   = os.path.join("Artifacts", "Lung_Disease", "Lung_Model.h5")
-brain_model_path  = os.path.join("Artifacts", "Brain_Tumour", "BrainModel.h5")
+kidney_model_path = abs_path("Artifacts", "Kidney_Disease", "Kidney_Model.h5")
+lung_model_path   = abs_path("Artifacts", "Lung_Disease", "Lung_Model.h5")
+brain_model_path  = abs_path("Artifacts", "Brain_Tumour", "BrainModel.h5")
 
 kidney_model = safe_load_keras_model(kidney_model_path, "Kidney")
 lung_model   = safe_load_keras_model(lung_model_path, "Lung")
 brain_model  = safe_load_keras_model(brain_model_path, "Brain Tumour")
 
-app = Flask(__name__)
+print("FINAL MODEL STATUS:")
+print("kidney_model:", "LOADED" if kidney_model is not None else "NOT LOADED")
+print("lung_model:", "LOADED" if lung_model is not None else "NOT LOADED")
+print("brain_model:", "LOADED" if brain_model is not None else "NOT LOADED")
 
+
+# =========================================================
+# GEMINI / TEXT MODEL
+# =========================================================
+try:
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    text_model = genai.GenerativeModel("gemini-1.5-flash")
+    print("[INFO] Gemini text model initialized.")
+except Exception as e:
+    text_model = None
+    print(f"[WARNING] Gemini model initialization failed: {e}")
+
+
+# =========================================================
+# MALARIA CONFIG
+# =========================================================
+MALARIA_UPLOAD_DIR = abs_path("static", "uploads", "malaria")
+os.makedirs(MALARIA_UPLOAD_DIR, exist_ok=True)
+
+malaria_predictor = None
+try:
+    malaria_predictor = MalariaPredictionPipeline()
+    print("[INFO] Malaria prediction pipeline loaded successfully.")
+except Exception as e:
+    print(f"[WARNING] Malaria predictor not loaded: {e}")
+
+
+def format_malaria_result(predicted_class):
+    if str(predicted_class).lower() == "parasitized":
+        return "Malaria Infected (Parasitized)"
+    return "Uninfected / No Malaria Detected"
+
+
+# =========================================================
+# BASIC ROUTES
+# =========================================================
 @app.route('/')
 def index():
     return render_template('Main.html')
 
-# @app.route('/services')
-# def index1():
-#     try:
-#         return render_template('services.html')
-#     except:
-#         return render_template('error.html')
 
 @app.route('/services')
 def index1():
     return render_template('Main.html')
-    
-'''@app.route('/landing')
-def other():
-    return render_template('landing.html')'''
+
 
 @app.route('/chatbot')
 def run_streamlit():
     try:
         subprocess.Popen(['streamlit', 'run', 'src/GeminiMed/app.py'])
         return redirect(url_for('index'))
-    except:
+    except Exception:
         return render_template('error.html')
 
 
@@ -168,65 +141,42 @@ def run_streamlit1():
     try:
         subprocess.Popen(['streamlit', 'run', 'src/MedicineRecognition/app.py'])
         return redirect(url_for('index'))
-    except:
+    except Exception:
         return render_template('error.html')
 
+
+# =========================================================
+# FOOD / INFO ROUTE
+# =========================================================
 @app.route('/food/<disease>/<tumor_type>', methods=['GET', 'POST'])
 def more_info(disease, tumor_type):
     if request.method == 'POST':
-        prompt = f"Give me information about the {disease} for this suffering type {tumor_type} in the following paragraph format:\
-        Disease Name: \
-        Disease Description:\
-        Disease Symptoms:\
-        Disease Treatment:\
-        Disease Food to Eat:\
-        Disease Food to Avoid:"  
-        # Generate information based on the disease and tumor type
-        answer = text_model.generate_content(prompt) # Replace with actual generated content
-        ans = answer.replace('*', '\n') 
-        return render_template("llm.html", answer=ans)
+        try:
+            if text_model is None:
+                return render_template("llm.html", answer="Gemini model is not configured on the server.")
+
+            prompt = f"""
+Give me information about the {disease} for this suffering type {tumor_type} in the following paragraph format:
+Disease Name:
+Disease Description:
+Disease Symptoms:
+Disease Treatment:
+Disease Food to Eat:
+Disease Food to Avoid:
+"""
+            answer = text_model.generate_content(prompt)
+            ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
+            return render_template("llm.html", answer=ans)
+
+        except Exception as e:
+            return render_template("llm.html", answer=f"Error: {str(e)}")
+
     return render_template("llm.html", disease=disease, tumor_type=tumor_type)
 
 
-
-
-
-# @app.route('/bcancer', methods=["GET", "POST"])
-# def brain_post():
-#     if request.method == 'POST':
-#         try:
-#             data = BCancer_Data(
-#                 texture_mean = float(request.form['texture_mean']),
-#                 smoothness_mean = float(request.form['smoothness_mean']),
-#                 compactness_mean = float(request.form['compactness_mean']),
-#                 concave_points_mean = float(request.form['concave_points_mean']),
-#                 symmetry_mean = float(request.form['symmetry_mean']),
-#                 fractal_dimension_mean = float(request.form['fractal_dimension_mean']),
-#                 texture_se = float(request.form['texture_se']),
-#                 area_se = float(request.form['area_se']),
-#                 smoothness_se = float(request.form['smoothness_se']),
-#                 compactness_se = float(request.form['compactness_se']),
-#                 concavity_se = float(request.form['concavity_se']),
-#                 concave_points_se = float(request.form['concave_points_se']),
-#                 symmetry_se = float(request.form['symmetry_se']),
-#                 fractal_dimension_se = float(request.form['fractal_dimension_se']),
-#                 texture_worst = float(request.form['texture_worst']),
-#                 area_worst = float(request.form['area_worst']),
-#                 smoothness_worst = float(request.form['smoothness_worst']),
-#                 compactness_worst = float(request.form['compactness_worst']),
-#                 concavity_worst = float(request.form['concavity_worst']),
-#                 concave_points_worst = float(request.form['concave_points_worst']),
-#                 symmetry_worst = float(request.form['symmetry_worst']),
-#                 fractal_dimension_worst = float(request.form['fractal_dimension_worst'])
-#                 )
-#             final_data = data.get_data_as_dataframe()
-#             predict_pipeline = PredictBCancer()
-#             pred = predict_pipeline.predict(final_data)
-#             an = round(pred[0], 2)
-#             return render_template('bcancer.html', final_result=an)
-#         except:
-#             pass
-#     return render_template('bcancer.html')
+# =========================================================
+# BREAST CANCER
+# =========================================================
 @app.route('/breastcancer', methods=["GET", "POST"])
 def breastcancer():
     if request.method == "POST":
@@ -269,7 +219,9 @@ def breastcancer():
     return render_template("bcancer.html")
 
 
-
+# =========================================================
+# DIABETES
+# =========================================================
 @app.route('/diabetes', methods=["GET", "POST"])
 def diabetes():
     if request.method == "POST":
@@ -297,132 +249,67 @@ def diabetes():
 
     return render_template("diabetes.html")
 
+
+# =========================================================
+# HEART
+# =========================================================
 @app.route('/heart', methods=["GET", "POST"])
 def heart():
-
     if request.method == "POST":
-
         try:
-
-            print(request.form)
-
-
             data = CustomData(
-
                 Age=int(request.form.get("Age", 0)),
-
                 Sex=request.form.get("Sex", "M"),
-
-                ChestPainType=request.form.get(
-                    "ChestPainType",
-                    "ATA"
-                ),
-
-                RestingBP=int(
-                    request.form.get("RestingBP", 0)
-                ),
-
-                Cholesterol=int(
-                    request.form.get("Cholesterol", 0)
-                ),
-
-                FastingBS=int(
-                    request.form.get("FastingBS", 0)
-                ),
-
-                RestingECG=request.form.get(
-                    "RestingECG",
-                    "Normal"
-                ),
-
-                MaxHR=int(
-                    request.form.get("MaxHR", 0)
-                ),
-
-                ExerciseAngina=request.form.get(
-                    "ExerciseAngina",
-                    "N"
-                ),
-
-                Oldpeak=float(
-                    request.form.get("Oldpeak", 0)
-                ),
-
-                ST_Slope=request.form.get(
-                    "ST_Slope",
-                    "Up"
-                )
-
+                ChestPainType=request.form.get("ChestPainType", "ATA"),
+                RestingBP=int(request.form.get("RestingBP", 0)),
+                Cholesterol=int(request.form.get("Cholesterol", 0)),
+                FastingBS=int(request.form.get("FastingBS", 0)),
+                RestingECG=request.form.get("RestingECG", "Normal"),
+                MaxHR=int(request.form.get("MaxHR", 0)),
+                ExerciseAngina=request.form.get("ExerciseAngina", "N"),
+                Oldpeak=float(request.form.get("Oldpeak", 0)),
+                ST_Slope=request.form.get("ST_Slope", "Up")
             )
-
 
             final_data = data.get_data_as_dataframe()
-
-
-            print("Input Data:")
-            print(final_data)
-
-
-
             predict_pipeline = PredictPipeline()
-
-
-            prediction = predict_pipeline.predict(
-                final_data
-            )
-
-
-            print("Prediction:", prediction)
-
-
+            prediction = predict_pipeline.predict(final_data)
 
             if prediction[0] == 1:
-
                 result = "⚠️ Heart Disease Risk Detected"
-
             else:
-
                 result = "✅ No Heart Disease Risk"
 
-
-
-            return render_template(
-                "heart.html",
-                final_result=result
-            )
-
+            return render_template("heart.html", final_result=result)
 
         except Exception as e:
-
             print("HEART ERROR:", e)
-
-            return render_template(
-                "heart.html",
-                final_result=f"Error: {e}"
-            )
-
+            return render_template("heart.html", final_result=f"Error: {e}")
 
     return render_template("heart.html")
 
+
+# =========================================================
+# KIDNEY
+# =========================================================
 @app.route('/kidney', methods=['GET', 'POST'])
 def kidney():
     if request.method == 'POST':
         temp_path = None
         try:
-            # ---------- Validate uploaded file ----------
-            if 'file' not in request.files:
+            if kidney_model is None:
                 return render_template(
                     'kidney.html',
-                    prediction="No file uploaded"
+                    prediction="Kidney model is not loaded on server. Check Render logs and model file path."
                 )
+
+            if 'file' not in request.files:
+                return render_template('kidney.html', prediction="No file uploaded")
 
             file = request.files['file']
 
             if file.filename == '':
-                return render_template(
-                    'kidney.html',
-                    prediction="No file selected"
-                )
+                return render_template('kidney.html', prediction="No file selected")
 
             allowed_extensions = {'png', 'jpg', 'jpeg'}
             ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
@@ -430,44 +317,43 @@ def kidney():
             if ext not in allowed_extensions:
                 return render_template(
                     'kidney.html',
-                    prediction="Invalid file type. Please upload a PNG, JPG, or JPEG image."
+                    prediction="Invalid file type. Please upload PNG, JPG, or JPEG image."
                 )
 
-            # ---------- Save uploaded file temporarily ----------
-            temp_dir = "temp_uploads"
+            temp_dir = abs_path("temp_uploads")
             os.makedirs(temp_dir, exist_ok=True)
-            temp_path = os.path.join(temp_dir, "kidney_input.jpg")
+
+            temp_filename = f"kidney_{uuid.uuid4().hex}.jpg"
+            temp_path = os.path.join(temp_dir, temp_filename)
             file.save(temp_path)
 
-            # ---------- Read and preprocess image ----------
             img = cv2.imread(temp_path)
-
             if img is None:
-                return render_template(
-                    'kidney.html',
-                    prediction="Unable to read the uploaded image."
-                )
+                return render_template('kidney.html', prediction="Unable to read the uploaded image.")
 
+            # ---- IMPORTANT ----
+            # Change resize if your model was trained on a different size.
+            # If your kidney model was trained on 150x150, replace (224,224) with (150,150)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = cv2.resize(img, (224, 224))
             img = img.astype("float32")
 
-            # MobileNetV2 preprocessing
+            # If your training used /255.0 then use that instead.
+            # img = img / 255.0
+
+            # If your training used MobileNetV2 preprocessing, keep this:
             img = img / 127.5 - 1.0
+
             img = np.expand_dims(img, axis=0)
 
-            # ---------- Prediction ----------
             preds = kidney_model.predict(img, verbose=0)[0]
 
-            # IMPORTANT:
-            # This order must match the training class_indices
             class_labels = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
             pred_idx = int(np.argmax(preds))
             raw_label = class_labels[pred_idx]
             confidence = round(float(preds[pred_idx]) * 100, 2)
 
-            # ---------- User-friendly result text ----------
             if raw_label == 'Normal':
                 result_text = "Normal Kidney CT"
             elif raw_label == 'Cyst':
@@ -479,7 +365,6 @@ def kidney():
             else:
                 result_text = raw_label
 
-            # ---------- Probability table ----------
             probs = {
                 'Cyst': round(float(preds[class_labels.index('Cyst')]) * 100, 2),
                 'Normal': round(float(preds[class_labels.index('Normal')]) * 100, 2),
@@ -496,74 +381,21 @@ def kidney():
 
         except Exception as e:
             print("Kidney prediction error:", e)
-            return render_template(
-                'kidney.html',
-                prediction=f"Error: {str(e)}"
-            )
+            return render_template('kidney.html', prediction=f"Error: {str(e)}")
 
         finally:
-            # ---------- Always remove temp file ----------
             try:
                 if temp_path and os.path.exists(temp_path):
                     os.remove(temp_path)
-            except:
+            except Exception:
                 pass
 
     return render_template('kidney.html')
-# @app.route('/kidney', methods=['GET', 'POST'])
-# def kidney():
-#     if request.method == 'POST':
-#         try:
-#             class_labels = {
-#                 0: 'Cyst',
-#                 1: 'Normal',
-#                 2: 'Stone',
-#                 3: 'Tumor'
-#             }
-
-#             file = request.files.get('file')
-
-#             if file is None or file.filename == '':
-#                 return render_template(
-#                     'kidney.html',
-#                     error='Please upload a kidney CT image.'
-#                 )
-
-#             file_path = 'temp_kidney.jpg'
-#             file.save(file_path)
-
-#             img = cv2.imread(file_path)
-#             img = cv2.resize(img, (150, 150))
-#             img = img.astype("float32") / 255.0
-#             img = np.expand_dims(img, axis=0)
-
-#             predictions = kidney_model.predict(img)[0]
-
-#             predicted_index = np.argmax(predictions)
-#             prediction_label = class_labels[predicted_index]
-#             confidence = float(np.max(predictions)) * 100
-
-#             os.remove(file_path)
-
-#             return render_template(
-#                 'kidney.html',
-#                 prediction=prediction_label,
-#                 confidence=round(confidence, 2),
-#                 cyst=round(float(predictions[0]) * 100, 2),
-#                 normal=round(float(predictions[1]) * 100, 2),
-#                 stone=round(float(predictions[2]) * 100, 2),
-#                 tumor=round(float(predictions[3]) * 100, 2)
-#             )
-
-#         except Exception as e:
-#             return render_template(
-#                 'kidney.html',
-#                 error=f'Error: {str(e)}'
-#             )
-
-#     return render_template('kidney.html')
 
 
+# =========================================================
+# LUNG
+# =========================================================
 @app.route('/lung', methods=['GET', 'POST'])
 def lung():
     classes = [
@@ -577,26 +409,23 @@ def lung():
     if request.method == 'POST':
         temp_path = None
         try:
-            # check file
-            if 'file' not in request.files:
+            if lung_model is None:
                 return render_template(
                     'lung.html',
-                    error='No file part found in request.'
+                    error="Lung model is not loaded on server. Check Render logs and model file path."
                 )
+
+            if 'file' not in request.files:
+                return render_template('lung.html', error='No file part found in request.')
 
             file = request.files['file']
 
             if file.filename is None or file.filename.strip() == '':
-                return render_template(
-                    'lung.html',
-                    error='Please select a lung X-ray image.'
-                )
+                return render_template('lung.html', error='Please select a lung X-ray image.')
 
-            # create temp folder safely
-            temp_dir = os.path.join(os.getcwd(), 'temp_uploads')
+            temp_dir = abs_path('temp_uploads')
             os.makedirs(temp_dir, exist_ok=True)
 
-            # safe unique filename
             original_name = secure_filename(file.filename)
             ext = os.path.splitext(original_name)[1].lower()
 
@@ -608,17 +437,15 @@ def lung():
 
             unique_name = f"{uuid.uuid4().hex}{ext}"
             temp_path = os.path.join(temp_dir, unique_name)
-
-            # save uploaded file
             file.save(temp_path)
 
-            # preprocess image
             img = Image.open(temp_path).convert('RGB')
+
+            # Change size if your lung model was trained on a different input shape
             img = img.resize((224, 224))
             img_array = np.array(img, dtype=np.float32) / 255.0
             img_array = np.expand_dims(img_array, axis=0)
 
-            # predict
             prediction = lung_model.predict(img_array, verbose=0)[0]
             predicted_index = int(np.argmax(prediction))
             predicted_class = classes[predicted_index]
@@ -629,10 +456,6 @@ def lung():
                 for i in range(len(classes))
             }
 
-            # delete temp file AFTER prediction
-            if temp_path and os.path.exists(temp_path):
-                os.remove(temp_path)
-
             return render_template(
                 'lung.html',
                 prediction=predicted_class,
@@ -642,21 +465,21 @@ def lung():
 
         except Exception as e:
             print("LUNG ERROR:", e)
+            return render_template('lung.html', error=f"Error while processing image: {str(e)}")
 
-            # cleanup if file exists
+        finally:
             try:
                 if temp_path and os.path.exists(temp_path):
                     os.remove(temp_path)
-            except:
+            except Exception:
                 pass
-
-            return render_template(
-                'lung.html',
-                error=f"Error while processing image: {str(e)}"
-            )
 
     return render_template('lung.html')
 
+
+# =========================================================
+# LIVER
+# =========================================================
 @app.route('/liver', methods=['GET', 'POST'])
 def liver():
     if request.method == 'POST':
@@ -683,7 +506,7 @@ def liver():
                 probs = predictor.predict_proba(final_data)
                 if probs is not None:
                     probability = round(float(probs[0][1]) * 100, 2)
-            except:
+            except Exception:
                 probability = None
 
             if int(pred[0]) == 1:
@@ -691,41 +514,18 @@ def liver():
             else:
                 result = "No Liver Disease Detected"
 
-            return render_template(
-                'liver.html',
-                prediction=result,
-                probability=probability
-            )
+            return render_template('liver.html', prediction=result, probability=probability)
 
         except Exception as e:
             print("LIVER ERROR:", e)
-            return render_template(
-                'liver.html',
-                prediction=f"Error: {str(e)}"
-            )
+            return render_template('liver.html', prediction=f"Error: {str(e)}")
 
     return render_template('liver.html')
 
-# =========================
-# MALARIA CONFIG
-# =========================
-MALARIA_UPLOAD_DIR = os.path.join("static", "uploads", "malaria")
-os.makedirs(MALARIA_UPLOAD_DIR, exist_ok=True)
 
-malaria_predictor = None
-try:
-    malaria_predictor = MalariaPredictionPipeline()
-    print("[INFO] Malaria prediction pipeline loaded successfully.")
-except Exception as e:
-    print(f"[WARNING] Malaria predictor not loaded yet: {e}")
-
-
-def format_malaria_result(predicted_class):
-    if predicted_class.lower() == "parasitized":
-        return "Malaria Infected (Parasitized)"
-    return "Uninfected / No Malaria Detected"
-
-
+# =========================================================
+# MALARIA
+# =========================================================
 @app.route('/malaria', methods=['GET', 'POST'])
 def malaria():
     prediction = None
@@ -804,8 +604,11 @@ def malaria():
         uploaded_image=uploaded_image,
         error=error
     )
-    
 
+
+# =========================================================
+# PARKINSONS
+# =========================================================
 @app.route('/parkinsons', methods=["GET", "POST"])
 def parkinsons():
     if request.method == 'POST':
@@ -834,51 +637,69 @@ def parkinsons():
 
         except Exception as e:
             print("Parkinson's prediction error:", e)
-            return render_template("parkinsons.html", final_result="Error in prediction")
+            return render_template("parkinsons.html", final_result=f"Error: {str(e)}")
 
     return render_template("parkinsons.html")
 
-import os
-import google.generativeai as genai
-
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-text_model = genai.GenerativeModel('gemini-pro') 
 
 # =========================================================
-# BRAIN TUMOUR ROUTES
+# BRAIN TUMOUR
 # =========================================================
-
 @app.route('/brain', methods=['GET', 'POST'])
 def brain():
     if request.method == 'POST':
+        temp_path = None
         try:
+            print("=" * 80)
+            print("[BRAIN ROUTE] POST request received")
+            print(f"[BRAIN ROUTE] brain_model is None? {brain_model is None}")
+            print(f"[BRAIN ROUTE] brain_model type: {type(brain_model)}")
+            print("=" * 80)
+
             if brain_model is None:
+                print("[BRAIN ROUTE ERROR] Brain Tumour model is not loaded on server")
                 return render_template(
                     'brain_tumour.html',
-                    error="Brain Tumour model is not available. Please train/load the model first."
+                    error="Brain Tumour model is not loaded on server. Check Render logs and model file path."
                 )
 
             file = request.files.get('file')
 
             if file is None or file.filename == '':
+                print("[BRAIN ROUTE ERROR] No file uploaded")
                 return render_template(
                     'brain_tumour.html',
                     error="Please upload a brain MRI image."
                 )
 
-            temp_dir = "temp_uploads"
+            temp_dir = abs_path("temp_uploads")
             os.makedirs(temp_dir, exist_ok=True)
 
-            temp_filename = f"brain_{uuid.uuid4().hex}.jpg"
+            original_name = secure_filename(file.filename)
+            ext = os.path.splitext(original_name)[1].lower()
+
+            if ext not in ['.jpg', '.jpeg', '.png']:
+                print(f"[BRAIN ROUTE ERROR] Invalid extension: {ext}")
+                return render_template(
+                    'brain_tumour.html',
+                    error="Only JPG, JPEG, and PNG images are supported."
+                )
+
+            temp_filename = f"brain_{uuid.uuid4().hex}{ext}"
             temp_path = os.path.join(temp_dir, temp_filename)
             file.save(temp_path)
+
+            print(f"[BRAIN ROUTE] Saved file at: {temp_path}")
 
             img = Image.open(temp_path).convert("RGB")
             img = img.resize((224, 224))
             img = np.array(img, dtype=np.float32) / 255.0
             img = np.expand_dims(img, axis=0)
 
+            print(f"[BRAIN ROUTE] Input image shape: {img.shape}")
+
             preds = brain_model.predict(img, verbose=0)[0]
+            print(f"[BRAIN ROUTE] Raw predictions: {preds}")
 
             class_labels = ['Glioma Tumour', 'Meningioma Tumour', 'No Tumour', 'Pituitary Tumour']
             predicted_index = int(np.argmax(preds))
@@ -890,8 +711,8 @@ def brain():
                 for i in range(len(class_labels))
             }
 
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+            print(f"[BRAIN ROUTE] Final prediction: {prediction_label}")
+            print(f"[BRAIN ROUTE] Confidence: {confidence:.2f}")
 
             return render_template(
                 'brain_tumour.html',
@@ -901,64 +722,89 @@ def brain():
             )
 
         except Exception as e:
-            print("BRAIN ERROR:", e)
+            print("[BRAIN ROUTE EXCEPTION]", e)
             return render_template(
                 'brain_tumour.html',
                 error=f"Error while processing image: {str(e)}"
             )
 
+        finally:
+            try:
+                if temp_path and os.path.exists(temp_path):
+                    os.remove(temp_path)
+                    print(f"[BRAIN ROUTE] Temp file removed: {temp_path}")
+            except Exception as cleanup_error:
+                print("[BRAIN ROUTE CLEANUP ERROR]", cleanup_error)
+
     return render_template('brain_tumour.html')
 
 
+# =========================================================
+# BRAIN INFO ROUTES
+# =========================================================
 @app.route('/brain_tumour1')
 def brain_tumour1():
-    prompt = """Give me information about glioma brain tumour in the following format:
+    try:
+        if text_model is None:
+            return render_template("llm.html", answer="Gemini model is not configured on the server.")
+
+        prompt = """Give me information about glioma brain tumour in the following format:
 Disease Name:
 Disease Description:
 Disease Symptoms:
 Disease Treatment:
 Disease Food to Eat:
 Disease Food to Avoid:"""
-    answer = text_model.generate_content(prompt)
-    ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
-    return render_template("llm.html", answer=ans)
+        answer = text_model.generate_content(prompt)
+        ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
+        return render_template("llm.html", answer=ans)
+    except Exception as e:
+        return render_template("llm.html", answer=f"Error: {str(e)}")
 
 
 @app.route('/brain_tumour2')
 def brain_tumour2():
-    prompt = """Give me information about meningioma brain tumour in the following format:
+    try:
+        if text_model is None:
+            return render_template("llm.html", answer="Gemini model is not configured on the server.")
+
+        prompt = """Give me information about meningioma brain tumour in the following format:
 Disease Name:
 Disease Description:
 Disease Symptoms:
 Disease Treatment:
 Disease Food to Eat:
 Disease Food to Avoid:"""
-    answer = text_model.generate_content(prompt)
-    ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
-    return render_template("llm.html", answer=ans)
+        answer = text_model.generate_content(prompt)
+        ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
+        return render_template("llm.html", answer=ans)
+    except Exception as e:
+        return render_template("llm.html", answer=f"Error: {str(e)}")
 
 
 @app.route('/brain_tumour3')
 def brain_tumour3():
-    prompt = """Give me information about pituitary brain tumour in the following format:
+    try:
+        if text_model is None:
+            return render_template("llm.html", answer="Gemini model is not configured on the server.")
+
+        prompt = """Give me information about pituitary brain tumour in the following format:
 Disease Name:
 Disease Description:
 Disease Symptoms:
 Disease Treatment:
 Disease Food to Eat:
 Disease Food to Avoid:"""
-    answer = text_model.generate_content(prompt)
-    ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
-    return render_template("llm.html", answer=ans)
+        answer = text_model.generate_content(prompt)
+        ans = answer.text.replace('*', '\n') if hasattr(answer, "text") else str(answer).replace('*', '\n')
+        return render_template("llm.html", answer=ans)
+    except Exception as e:
+        return render_template("llm.html", answer=f"Error: {str(e)}")
 
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=5000)
-# if __name__ == '__main__':
 
-#     print(app.url_map)
-
-#     app.run(debug=True, host='0.0.0.0', port=5000)
-
+# =========================================================
+# MAIN
+# =========================================================
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
