@@ -1,157 +1,315 @@
-# OpenHealth: A Comprehensive AI Tool for Remote Health Care    (Under Development)
+<div align="center">
 
-<img src="static/images/Logo.png" alt="Project Logo"/>
+# 🩺 OpenHealth
 
-Connect with me on social media and explore my work:
+### AI-Powered Multi-Disease Detection & Diagnosis Assistant
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/hemakalyan)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat-square&logo=github)](https://github.com/KalyanMurapaka45)
-[![Medium](https://img.shields.io/badge/Medium-Follow-03a57a?style=flat-square&logo=medium)](https://medium.com/@kalyanmurapaka274)
-[![Twitter](https://img.shields.io/twitter/follow/KalyanM45?style=social)](https://twitter.com/KalyanM45)
-[![Sponsor Hema Kalyan Murapaka](https://img.shields.io/badge/Sponsor-Hema_Kalyan-28a745?style=flat-square&logo=github-sponsors)](https://github.com/sponsors/KalyanM45)
+An end-to-end healthcare platform that combines deep learning (image-based diagnosis) and machine learning (tabular clinical prediction) with a Gemini-powered medical assistant — all under one Flask application.
 
-**Special Thanks to GitHub Sponsors**
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-2ea44f?style=for-the-badge&logo=render)](https://openhealth-4.onrender.com/)
+[![Python](https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-Backend-black?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange?style=for-the-badge&logo=tensorflow)](https://www.tensorflow.org/)
 
-## About The Project
+**🔗 Live Demo:** [https://openhealth-4.onrender.com/](https://openhealth-4.onrender.com/)
 
-In an era where healthcare demands precision, accessibility, and personalised solutions, "OpenHealth" emerges as a groundbreaking initiative at the intersection of technology and medicine. This comprehensive project focuses on Multi-Disease Detection, employing a diverse set of algorithms, including traditional machine learning models, deep learning models, transfer learning, and hybrid models such as VGG-19, ResNet50, Random Forest, and Gradient Boosting. Diseases across specific organs, such as the brain, kidney, heart, liver, and lungs, are accurately predicted, and model performance is rigorously assessed through metrics like accuracy, precision, recall, and F1-score. Adding a layer of sophistication, "OpenHealth" integrates with large language models from Open-source libraries like Hugging Face and GenerativeAI from Google, providing personalised information based on individual health profiles. Furthermore, the project extends its impact by incorporating an AI dietitian and food recommender, tailoring dietary recommendations to individual health conditions. Meticulous organisation is ensured through dedicated directory structures, fostering a modular and maintainable framework. Leveraging Machine Learning operations like Dockers, Data Version Control, and MLflow enhances the overall efficiency and reliability of healthcare systems. In essence, "OpenHealth" represents a transformative force that leverages cutting-edge technologies to usher in a new era of healthcare characterised by accuracy, personalization, and efficiency.
+</div>
 
+---
 
-## Library Requirements
+## 📖 Overview
 
- - Pandas
- - Numpy
- - Scikit-learn
- - Seaborn
- - Matplotlib
- - Flask 
- - DVC
- - Catboost
- - XGBoost
- - MLflow
- - Google.generativeai
- - Streamlit
+**OpenHealth** is a unified disease-detection web application that brings together **9 independent prediction pipelines** — spanning CNN-based medical imaging models and classical ML models on clinical/tabular data — into a single, easy-to-use interface. It also integrates a **Gemini-powered LLM** to generate patient-friendly disease information (symptoms, treatment, and dietary guidance) and includes standalone **chatbot** and **medicine recognition** modules built with Streamlit.
 
-## Getting Started
+> ⚠️ **Disclaimer:** OpenHealth is an educational/portfolio project. It is **not** a certified medical device and must **not** be used as a substitute for professional medical advice, diagnosis, or treatment.
 
-This will help you understand how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+---
 
-## Installation Steps
+## ✨ Features
 
-### Option 1: Installation from GitHub
+### 🖼️ Image-Based Detection (Deep Learning / CNN)
 
-Follow these steps to install and set up the project directly from the GitHub repository:
+| Module | Classes Detected | Input |
+|---|---|---|
+| 🫘 **Kidney Disease** | Cyst, Normal, Stone, Tumor | CT Scan |
+| 🫁 **Lung Disease** | Bacterial Pneumonia, COVID-19, Normal, Tuberculosis, Viral Pneumonia | Chest X-Ray |
+| 🧠 **Brain Tumour** | Glioma, Meningioma, Pituitary, No Tumour | MRI Scan |
+| 🦟 **Malaria** | Parasitized, Uninfected | Blood Cell Microscopy Image |
 
-1. **Clone the Repository**
-   - Open your terminal or command prompt.
-   - Navigate to the directory where you want to install the project.
-   - Run the following command to clone the GitHub repository:
-     ```
-     git clone https://github.com/KalyanMurapaka45/OpenHealth.git
-     ```
+### 📊 Clinical Data Prediction (ML on Tabular Data)
 
-2. **Create a Virtual Environment** (Optional but recommended)
-   - It's a good practice to create a virtual environment to manage project dependencies. Run the following command:
-     ```
-     conda create -p <Environment_Name> python==<python version> -y
-     ```
+| Module | Prediction |
+|---|---|
+| 💉 **Diabetes** | Diabetic / Not Diabetic |
+| ❤️ **Heart Disease** | Risk Detected / No Risk |
+| 🎗️ **Breast Cancer** | Malignant / Benign |
+| 🧬 **Parkinson's Disease** | Detected / Not Detected |
+| 🫀 **Liver Disease** | Detected / Not Detected (with probability score) |
 
-3. **Activate the Virtual Environment** (Optional)
-   - Activate the virtual environment based on your operating system:
-       ```
-       conda activate <Environment_Name>/
-       ```
+### 🤖 AI Assistant & Extras
 
-4. **Install Dependencies**
-   - Navigate to the project directory:
-     ```
-     cd [project_directory]
-     ```
-   - Run the following command to install project dependencies:
-     ```
-     pip install -r requirements.txt
-     ```
+- **Gemini-Powered Insights** — For every detected condition, generates structured information: description, symptoms, treatment, foods to eat, and foods to avoid.
+- **GeminiMed Chatbot** — A Streamlit-based conversational medical assistant.
+- **Medicine Recognition** — A Streamlit app to identify medicines from images.
+- **Confidence Scores** — Every image-based prediction returns class-wise probability breakdowns, not just a single label.
 
-5. **Run the Project**
-   - Start the project by running the appropriate command.
-     ```
-     python app.py
-     ```
+---
 
-6. **Access the Project**
-   - Open a web browser or the appropriate client to access the project.
+## 📸 Screenshots
 
+<div align="center">
 
-### Option 2: Installation from DockerHub (Coming Soon)
+### 🏠 Home Page
+<img src="OpenHealthScreenShots/HomePage.png" width="800"/>
 
-If you prefer to use Docker, you can install and run the project using a Docker container from DockerHub:
+<br>
 
-1. **Pull the Docker Image**
-   - Open your terminal or command prompt.
-   - Run the following command to pull the Docker image from DockerHub:
-     ```
-     docker pull kalyan45/<IMAGE>
-     ```
-     This command downloads the Docker image from the DockerHub.
+### 🫘 Kidney Disease Detection
 
-2. **Run the Docker Container**
-   - Start the Docker container by running the following command. Adjust the port mapping as needed:
-     ```
-     docker run -p 5000:5000 kalyan45/<IMAGE>
-     ```
-     This command launches the project within a Docker container.
+**Upload & Prediction View**
+<img src="OpenHealthScreenShots/kidney1.png" width="800"/>
 
-3. **Access the Project**
-   - Open a web browser or the appropriate client to access the project.<br>
+**Result with Confidence Scores**
+<img src="OpenHealthScreenShots/kidney2.png" width="800"/>
 
+<br>
 
-## API Key Setup
+### 🫁 Lung Disease Detection
 
-To use this project, you need an API key from Google Gemini Large Language Model. Follow these steps to obtain and set up your API key:
+**Upload & Prediction View**
+<img src="OpenHealthScreenShots/lungs1.png" width="800"/>
 
-1. **Get API Key:**
-   - Visit the Provided Link [Click Here](https://makersuite.google.com/app/apikey).
-   - Follow the instructions to create an account and obtain your API key.
+**Result with Confidence Scores**
+<img src="OpenHealthScreenShots/lungs2.png" width="800"/>
 
-2. **Set Up API Key:**
-   - Create a file named `.env` in the project root.
-   - Add your API key to the `.env` file:
-     ```dotenv
-     API_KEY=your_api_key_here
-     ```
+<br>
 
-   **Note:** Keep your API key confidential. Do not share it publicly or expose it in your code.<br>
+### 🧠 Brain Tumour Detection
 
+**Upload & Prediction View**
+<img src="OpenHealthScreenShots/Brain1.png" width="800"/>
 
-## Contributing
+**Result with Confidence Scores**
+<img src="OpenHealthScreenShots/Brain2.png" width="800"/>
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+<br>
 
-• **Report bugs**: If you encounter any bugs, please let us know. Open up an issue and let us know the problem.
+### 🦟 Malaria Detection
 
-• **Contribute code**: If you are a developer and want to contribute, follow the instructions below to get started!
+**Upload & Prediction View**
+<img src="OpenHealthScreenShots/malaria1.png" width="800"/>
 
-1. Fork the Project
-2. Create your Feature Branch
-3. Commit your Changes
-4. Push to the Branch
-5. Open a Pull Request
+**Result with Confidence Scores**
+<img src="OpenHealthScreenShots/malaria2.png" width="800"/>
 
-• **Suggestions**: If you don't want to code but have some awesome ideas, open up an issue explaining some updates or improvements you would like to see!
+<br>
 
-#### Don't forget to give the project a star! Thanks again!
+### ❤️ Heart Disease Prediction
+<img src="OpenHealthScreenShots/heart1.png" width="800"/>
 
-## License
+<br>
 
-This project is licensed under the [Open Source Initiative (OSI)](https://opensource.org/) approved GNU General Public License v3.0 License - see the [LICENSE.txt](LICENSE.txt) file for details.<br>
+### 🎗️ Breast Cancer Prediction
+<img src="OpenHealthScreenShots/breast1.png" width="800"/>
 
+<br>
 
-## Contact Details
+### 🫀 Liver Disease Prediction
+<img src="OpenHealthScreenShots/Liver1.png" width="800"/>
 
-Hema Kalyan Murapaka - [kalyanmurapaka274@gmail.com](kalyanmurapaka274@gmail.com)<br>
+<br>
 
+### 🧬 Parkinson's Disease Prediction
+<img src="OpenHealthScreenShots/Parkinsons1.png" width="800"/>
 
-## Acknowledgements
+<br>
 
-We'd like to extend our gratitude to all individuals and organizations who have played a role in the development and success of this project. Your support, whether through contributions, inspiration, or encouragement, has been invaluable. Thank you for being a part of our journey.
+### 🚀 Render Deployment
+
+**Deployment Dashboard**
+<img src="OpenHealthScreenShots/renderDeploy1.png" width="800"/>
+
+**Live Service Status**
+<img src="OpenHealthScreenShots/renderDeploy2.png" width="800"/>
+
+</div>
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Flask (Python) |
+| **Deep Learning** | TensorFlow / Keras (CNN models: `.h5`) |
+| **Machine Learning** | Scikit-learn (pipelines: `.pkl`) |
+| **Image Processing** | OpenCV, Pillow (PIL) |
+| **Generative AI** | Google Gemini (`google-generativeai`) |
+| **Chat / Auxiliary Apps** | Streamlit |
+| **Deployment** | Render |
+| **Frontend** | HTML, CSS, Jinja2 Templates |
+
+---
+
+## 📁 Project Structure
+
+```
+OpenHealth/
+├── Artifacts/
+│   ├── Kidney_Disease/
+│   │   └── Kidney_Model.h5
+│   ├── Lung_Disease/
+│   │   └── Lung_Model.h5
+│   ├── Brain_Tumour/
+│   │   └── BrainModel.h5
+│   └── Liver_Disease/
+│       └── Liver_Model.pkl
+├── OpenHealth/
+│   └── DiseaseDetection/
+│       ├── Malaria_Prediction/
+│       ├── Diabetes_Disease_Prediction/
+│       ├── Heart_Disease_Prediction/
+│       ├── Breast_Cancer_Prediction/
+│       ├── Parkinsons_Disease_Prediction/
+│       └── Liver_Disease_Prediction/
+├── src/
+│   ├── GeminiMed/            # Streamlit chatbot
+│   └── MedicineRecognition/  # Streamlit medicine recognition app
+├── static/
+│   ├── css/
+│   └── uploads/
+├── templates/
+│   ├── Main.html
+│   ├── kidney.html
+│   ├── lung.html
+│   ├── brain_tumour.html
+│   ├── malaria.html
+│   ├── diabetes.html
+│   ├── heart.html
+│   ├── bcancer.html
+│   ├── liver.html
+│   ├── parkinsons.html
+│   └── llm.html
+├── OpenHealthScreenShots/
+├── a.py                       # Main Flask application
+└── requirements.txt
+```
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/OpenHealth.git
+cd OpenHealth
+```
+
+### 2. Create a virtual environment
+
+```bash
+conda create -n OpenHealth python=3.10
+conda activate OpenHealth
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set environment variables
+
+Create a `.env` file (or set system environment variables):
+
+```
+GOOGLE_API_KEY=your_gemini_api_key_here
+```
+
+### 5. Run the application
+
+```bash
+python a.py
+```
+
+The app will be available at `http://127.0.0.1:5000/`.
+
+---
+
+## 🌐 API Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/` | GET | Home page |
+| `/kidney` | GET, POST | Kidney CT scan prediction |
+| `/lung` | GET, POST | Lung X-ray prediction |
+| `/brain` | GET, POST | Brain MRI tumour prediction |
+| `/malaria` | GET, POST | Malaria cell image prediction |
+| `/diabetes` | GET, POST | Diabetes risk prediction |
+| `/heart` | GET, POST | Heart disease risk prediction |
+| `/breastcancer` | GET, POST | Breast cancer classification |
+| `/parkinsons` | GET, POST | Parkinson's disease detection |
+| `/liver` | GET, POST | Liver disease prediction |
+| `/food/<disease>/<tumor_type>` | GET, POST | Gemini-generated disease info |
+| `/chatbot` | GET | Launches Streamlit medical chatbot |
+| `/recognition` | GET | Launches Streamlit medicine recognition app |
+
+---
+
+## 🧠 Model Details
+
+| Model | Input Size | Preprocessing |
+|---|---|---|
+| Kidney CNN | 224×224 | MobileNet-style normalization (`img / 127.5 - 1.0`) |
+| Lung CNN | 224×224 | Rescaled (`img / 255.0`) |
+| Brain Tumour CNN | 224×224 | Rescaled (`img / 255.0`) |
+| Malaria CNN | Pipeline-defined | Handled internally by `PredictionPipeline` |
+
+> Note: If a model was trained with a different input size or normalization, update the corresponding preprocessing block in `a.py` to match training-time settings.
+
+---
+
+## 🚀 Deployment (Render)
+
+This project is deployed on **Render** and live at:
+👉 **[https://openhealth-4.onrender.com/](https://openhealth-4.onrender.com/)**
+
+Key production considerations handled in `a.py`:
+- Absolute path resolution for model files (Render-safe, avoids relative path issues)
+- Graceful fallback messages if a model fails to load, instead of crashing the app
+- Dynamic `PORT` binding via `os.environ.get("PORT", 5000)` for Render compatibility
+- Startup diagnostics logging model load status for each disease model
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-model`)
+3. Commit your changes
+4. Open a pull request
+
+---
+
+## 📄 License
+
+This project is open-source. Add your preferred license (MIT, Apache 2.0, etc.) here.
+
+---
+
+## 🙌 Acknowledgements
+
+- Kidney CT Dataset — CT-KIDNEY-DATASET (Normal-Cyst-Tumor-Stone)
+- Malaria Cell Images Dataset
+- Google Gemini API for medical information generation
+- Render for free-tier deployment hosting
+
+---
+
+<div align="center">
+
+**Built with ❤️ for accessible, AI-assisted healthcare screening.**
+
+</div>
